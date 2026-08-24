@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --ink:#17131C; --ink2:#241E2B; --muted:#B7A9B4; --line:#3A2F3C; --bg:#1D1720; --card:#251E29;
+  --text:#F3E9EE; --rouge:#E27594; --rouge-d:#F0A9BC; --rouge-s:#3A2530; --ok:#5FAE85; --ok-s:#1E332A; --r:16px;
+  --sh:0 1px 2px rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);
+  display:flex;justify-content:center;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+a{color:inherit}
+
+.app-shell{width:100%;max-width:430px;margin:0 auto;background:var(--bg);color:var(--text);min-height:100dvh;position:relative;
+  padding-bottom:calc(80px + env(safe-area-inset-bottom));overflow-x:hidden;display:flex;flex-direction:column}
+
+/* ============================================================ TOP BAR */
+.topbar{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;border-bottom:1px solid #2B2430;
+  padding:calc(11px + env(safe-area-inset-top)) 16px 11px;display:flex;align-items:center;gap:10px}
+.topbar b{font-family:Fraunces,serif;font-size:19px}
+.topbar b span{color:#F0A9BC}
+.topbar .signout{margin-left:auto;background:none;border:0;color:#F0A9BC;font-weight:600;font-size:13px}
+
+/* ============================================================ POČETNA — pun ekran, slika, dugme */
+.hero{
+  position:relative; color:#fff; overflow:hidden;
+  flex:1; min-height:60dvh; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end; text-align:center;
+  padding:32px 24px 40px;
+  background:
+    linear-gradient(180deg, rgba(23,19,28,.10) 0%, rgba(23,19,28,.30) 45%, rgba(23,19,28,.94) 90%, var(--ink) 100%),
+    url('https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=1200&q=80') center 22%/cover no-repeat;
+}
+.hero .mark{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#D8C7CF;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.hero h1{font-family:Fraunces,serif;font-weight:600;font-size:44px;margin:10px 0 12px;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.hero p{color:#EFE8EB;font-size:14px;margin:0 0 24px;line-height:1.55;max-width:30ch;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.hero .cta{display:inline-block;background:var(--rouge);color:#fff;border:0;border-radius:999px;
+  padding:17px 42px;font-weight:700;font-size:16px;box-shadow:0 10px 28px rgba(168,50,79,.45)}
+.hero .cta:hover{box-shadow:0 14px 34px rgba(168,50,79,.55);transform:translateY(-1px)}
+.hero .cta:active{transform:scale(.96)}
+
+.homedark{background:var(--ink);color:#fff;padding:24px 20px 34px}
+.homedark .eyebrow{color:#B6A9B4;margin-top:0}
+.homedark .eyebrow:after{background:#3B3244}
+.info-dark{display:flex;align-items:center;gap:12px;background:#241E29;border:1px solid #362E3D;border-radius:14px;
+  padding:13px;text-decoration:none;color:#fff;margin-bottom:8px}
+.info-dark .ic{width:36px;height:36px;border-radius:11px;background:#362E3D;color:#F0A9BC;
+  display:grid;place-items:center;font-size:16px;flex:none}
+.info-dark .tiny{color:#9E93A2}
+.info-dark .name{font-weight:600;color:var(--text)}
+.info-dark .chev{color:#8A7F8D;font-size:15px}
+
+/* ============================================================ GENERIC BLOCKS */
+.pagehead h2{font-family:Fraunces,serif;font-weight:600;font-size:24px;margin:0;color:var(--text)}
+.pagehead p{margin:4px 0 14px;color:var(--muted);font-size:13.5px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;
+  margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.eyebrow:after{content:"";flex:1;height:1px;background:var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.row{display:flex;align-items:center;gap:11px}
+.grow{flex:1;min-width:0}
+.tiny{font-size:12.5px;color:var(--muted)}
+.name{font-weight:600;color:var(--text)}
+.price{font-weight:700;font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:8px}
+.hr{border-top:1px solid var(--line);margin:12px 0}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--rouge-s);color:var(--rouge-d);border:0}
+.tag.g{background:var(--ok-s);color:var(--ok)}
+.tag.n{background:var(--line);color:var(--text)}
+.ghost{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600}
+.btn{width:100%;padding:15px;border-radius:14px;border:0;background:var(--rouge);color:#fff;font-weight:700;font-size:15px;
+  box-shadow:0 4px 14px rgba(168,50,79,.25)}
+.btn:disabled{opacity:.6}
+.btn:hover:not(:disabled){box-shadow:0 6px 20px rgba(168,50,79,.35);transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:scale(.98)}
+
+/* ============================================================ USLUGE I CENE */
+.band{width:100%;height:64px;object-fit:cover;display:block}
+.wthumb{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #fff;box-shadow:0 2px 8px rgba(23,19,28,.15)}
+.svc-row{display:flex;gap:12px;align-items:center}
+.svcpick{width:100%;display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);
+  border-radius:13px;padding:9px;margin-bottom:7px;text-align:left}
+.svcpick img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none}
+.svcpick.sel{border-color:var(--rouge);background:var(--rouge-s)}
+.svcpick .chk{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line);background:var(--ink2);
+  display:grid;place-items:center;font-size:12px;color:#fff;flex:none}
+.svcpick.sel .chk{background:var(--rouge);border-color:var(--rouge);color:#fff}
+
+/* ============================================================ REZERVACIJA — kalendar, slotovi */
+.blockbar{display:flex;gap:8px;align-items:center;background:var(--ink);color:#fff;border-radius:12px;
+  padding:11px 13px;margin:10px 0}
+.cal{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.calhead{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.calhead b{font-family:Fraunces,serif;color:var(--text)}
+.calhead button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--ink2);color:var(--text)}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow{text-align:center;font-size:10px;color:var(--muted);font-weight:700}
+.cell{aspect-ratio:1;border-radius:10px;border:1px solid var(--line);background:var(--ink2);color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.cell.none{background:var(--bg);color:#5C525F;border-color:transparent}
+.cell.on{background:var(--rouge);border-color:var(--rouge);color:#fff}
+.cell:not(:disabled):not(.none):hover{border-color:var(--rouge);transform:scale(1.06)}
+.cell:active:not(:disabled){transform:scale(.94)}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.slot{border:1px solid var(--line);background:var(--ink2);color:var(--text);border-radius:11px;padding:10px 0;font-weight:700;font-variant-numeric:tabular-nums}
+.slot.on{background:var(--rouge);border-color:var(--rouge);color:#fff;box-shadow:0 4px 12px rgba(168,50,79,.3)}
+.slot:not(:disabled):hover{border-color:var(--rouge);transform:translateY(-2px)}
+.slot:active{transform:scale(.95)}
+
+/* ============================================================ PROFIL */
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--rouge-s);color:var(--rouge-d);
+  display:grid;place-items:center;font-weight:700;font-size:24px;margin:0 auto 10px}
+
+/* ============================================================ OBAVEŠTENJA */
+.notif{display:flex;gap:11px;align-items:flex-start;padding:13px;border-radius:14px;background:var(--card);
+  border:1px solid var(--line);margin-bottom:8px}
+.notif.unread{border-color:var(--rouge);background:var(--rouge-s)}
+.notif .dot{width:8px;height:8px;border-radius:50%;background:var(--rouge);flex:none;margin-top:6px}
+
+/* ============================================================ DONJA TRAKA */
+.tabs{position:fixed;bottom:0;width:100%;max-width:430px;background:rgba(29,23,32,.92);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;padding:7px 4px calc(10px + env(safe-area-inset-bottom));z-index:30}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;
+  color:var(--muted);font-weight:600;min-height:52px;padding:4px 2px;transition:color .15s ease}
+.tabs button.on{color:var(--rouge)}
+.tabs .i{font-size:18px;line-height:1;display:inline-block;transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
+.tabs button.on .i{transform:scale(1.15)}
+.tabs button:active{transform:scale(.9)}
+
+/* ============================================================ PRELAZI I MIKRO-INTERAKCIJE */
+button:active{transform:scale(.97)}
+.anim-in{animation:slideFade .28s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideFade{ from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@media (prefers-reduced-motion:reduce){ .anim-in{animation:none} *{transition:none !important} }
+
+/* ============================================================ USLUGE — mreža radnika, cenovnik */
+.wpick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.wpick-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:left;box-shadow:var(--sh)}
+.wpick-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.wpick-info{padding:10px 11px 12px}
+.wpick-level{display:block;font-size:10.5px;color:var(--rouge-d);font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;margin-bottom:2px}
+.wpick-card .name{display:block;font-size:14px}
+.wpick-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(23,19,28,.12)}
+.wpick-card:active{transform:translateY(-1px) scale(.98)}
+
+.multitoggle{font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+  background:var(--ink2);color:var(--text);flex:none}
+.multitoggle.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.svcrow{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:10px;margin-bottom:8px}
+.svcrow img{width:54px;height:54px;border-radius:11px;object-fit:cover;flex:none}
+.svcrow.sel{border-color:var(--rouge);background:var(--rouge-s)}
+.svcrow-btn{font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:11px;background:var(--rouge);color:#fff;flex:none}
+.svcrow-btn:active{transform:scale(.94)}
+.chk-round{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--ink2);
+  color:var(--ink2);font-size:13px;flex:none}
+.chk-round.sel{background:var(--rouge);border-color:var(--rouge)}
+
+.selectbar{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:0;right:0;margin:0 auto;
+  width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--line);padding:12px 16px;
+  display:flex;align-items:center;gap:8px;box-shadow:0 -6px 20px rgba(0,0,0,.3);z-index:25}
+
+.notefield{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px;font:inherit;
+  resize:none;background:var(--ink2);color:var(--text);margin-bottom:14px}
+.notefield:focus{outline:none;border-color:var(--rouge)}
+
+
+/* ============================================================ AVATARI SA INICIJALIMA (bez tuđih fotografija) */
+.wpick-avatar{width:100%;aspect-ratio:1/1;display:grid;place-items:center;color:#fff;
+  font-family:Fraunces,serif;font-size:30px;font-weight:600}
+.wthumb-avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  font-family:Fraunces,serif;font-size:17px;font-weight:600;flex:none;box-shadow:0 2px 8px rgba(23,19,28,.15)}
+.svcicon{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;color:#fff;
+  font-size:20px;flex:none}
+
+/* ============================================================ JEZIK SR/EN */
+.lang{margin-left:10px;display:flex;border:1px solid #3A2F3C;background:#241E29;border-radius:999px;padding:2px}
+.lang button{padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.lang button.on{background:var(--rouge);color:#fff}
