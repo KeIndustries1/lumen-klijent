@@ -1,7 +1,26 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from './lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { catFor, initials } from './images'
+import { haptic } from './lib/haptic'
+
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const now = ctx.currentTime
+    ;[[880, 0], [1318.5, 0.09]].forEach(([freq, delay]) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain()
+      osc.type = 'sine'; osc.frequency.value = freq
+      osc.connect(gain); gain.connect(ctx.destination)
+      const t = now + delay
+      gain.gain.setValueAtTime(0.0001, t)
+      gain.gain.exponentialRampToValueAtTime(0.22, t + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5)
+      osc.start(t); osc.stop(t + 0.55)
+    })
+  } catch {}
+}
 
 const MON  = ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar']
 const din  = v => v.toLocaleString('sr-RS') + ' din'
@@ -12,7 +31,7 @@ const todayISO = iso(new Date())
 
 // worker: red iz workers, serviceIds: niz izabranih usluga (iz Services.jsx)
 export default function Booking({ salon, client, worker, serviceIds, onDone, onBack }) {
-  const [step, setStep] = useState(1)   // 1 datum+vreme (jedna strana) · 2 potvrda
+  const [step, setStep] = useState(1)   // 1 datum+vreme (jedna strana) · 2 potvrda · 3 uspeh
   const [services, setServices] = useState([])
   const [date, setDate] = useState(todayISO)
   const [time, setTime] = useState(null)
@@ -48,6 +67,7 @@ export default function Booking({ salon, client, worker, serviceIds, onDone, onB
     if (error) {
       setSaving(false)
       setErr(error.code === '23P01' ? 'Taj termin je upravo zauzet — izaberite drugo vreme.' : error.message)
+      haptic('warning')
       if (error.code === '23P01') { setTime(null); pickDate(date) }
       return
     }
@@ -55,8 +75,12 @@ export default function Booking({ salon, client, worker, serviceIds, onDone, onB
       services.map(s => ({ appointment_id: appt.id, service_id: s.id, price_rsd: s.price_rsd, duration_min: s.duration_min }))
     )
     setSaving(false)
-    onDone()
+    haptic('success')
+    playChime()
+    setStep(3)
   }
+
+  if (step === 3) return <SuccessScreen onDone={onDone} />
 
   return (
     <div className="anim-in" style={{ padding: 16 }}>
@@ -117,29 +141,75 @@ export default function Booking({ salon, client, worker, serviceIds, onDone, onB
   )
 }
 
+function SuccessScreen({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1700)
+    return () => clearTimeout(t)
+  }, [])
+
+  return createPortal((
+    <div className="success-screen" onClick={onDone}>
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+        className="success-circle"
+      >
+        <svg viewBox="0 0 52 52" width="52" height="52">
+          <motion.circle cx="26" cy="26" r="24" fill="none" stroke="#fff" strokeWidth="2.5"
+            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }} />
+          <motion.path d="M14 27l7 7 17-17" fill="none" stroke="#fff" strokeWidth="3.2"
+            strokeLinecap="round" strokeLinejoin="round"
+            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+            transition={{ duration: 0.35, delay: 0.4, ease: 'easeOut' }} />
+        </svg>
+      </motion.div>
+      <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+        Termin je zakazan
+      </motion.p>
+    </div>
+  ), document.body)
+}
+
 function Calendar({ selected, onPick }) {
   const [cal, setCal] = useState(() => { const d=new Date(); d.setDate(1); return d })
   const y = cal.getFullYear(), m = cal.getMonth()
   const startIdx = (new Date(y,m,1).getDay()+6)%7
   const dim = new Date(y, m+1, 0).getDate()
   const cells = [...Array(startIdx).fill(null), ...Array.from({length:dim},(_,i)=>i+1)]
+  const touchX = { current: null }
+
+  function onTouchStart(e) { touchX.current = e.touches[0].clientX }
+  function onTouchEnd(e) {
+    if (touchX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchX.current
+    if (Math.abs(dx) > 45) {
+      if (dx < 0) setCal(new Date(y, m+1, 1))   // swipe levo → sledeći mesec
+      else setCal(new Date(y, m-1, 1))          // swipe desno → prethodni mesec
+    }
+    touchX.current = null
+  }
 
   return (
-    <div className="cal">
-      <div className="calhead">
-        <b className="grow">{MON[m]} {y}</b>
-        <button onClick={()=>setCal(new Date(y,m-1,1))}>‹</button>
-        <button onClick={()=>setCal(new Date(y,m+1,1))}>›</button>
-      </div>
-      <div className="cg">
-        {['pon','uto','sre','čet','pet','sub','ned'].map(d=><div key={d} className="dow">{d}</div>)}
-        {cells.map((d,i) => {
-          if (d===null) return <div key={i}/>
-          const ds = iso(new Date(y,m,d))
-          const disabled = ds < todayISO || new Date(y,m,d).getDay()===0
-          return <button key={i} className={'cell'+(ds===selected?' on':disabled?' none':'')} disabled={disabled} onClick={()=>onPick(ds)}>{d}</button>
-        })}
-      </div>
+    <div className="cal" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <AnimatePresence mode="wait">
+        <motion.div key={`${y}-${m}`}
+          initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}>
+          <div className="calhead">
+            <b className="grow">{MON[m]} {y}</b>
+          </div>
+          <div className="cg">
+            {['pon','uto','sre','čet','pet','sub','ned'].map(d=><div key={d} className="dow">{d}</div>)}
+            {cells.map((d,i) => {
+              if (d===null) return <div key={i}/>
+              const ds = iso(new Date(y,m,d))
+              const disabled = ds < todayISO || new Date(y,m,d).getDay()===0
+              return <button key={i} className={'cell'+(ds===selected?' on':disabled?' none':'')} disabled={disabled} onClick={()=>onPick(ds)}>{d}</button>
+            })}
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }

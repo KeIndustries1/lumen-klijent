@@ -4,7 +4,8 @@ export default function Home({ salon, onBook }) {
   const { t } = useLang()
   return (
     <div className="anim-in">
-      <div className="hero">
+      <div className={'hero' + (salon.hero_image_url ? ' has-photo' : '')}
+        style={salon.hero_image_url ? { '--gate-photo': `url(${salon.hero_image_url})` } : undefined}>
         <div className="mark">{t('tagline')}</div>
         <h1>{salon.name}</h1>
         <p>{salon.about_sr}</p>

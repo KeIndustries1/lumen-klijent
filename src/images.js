@@ -12,11 +12,5 @@ export const ROLE_CATEGORY = {
   'Kozmetičar':          'face',
   'Trepavice i obrve':   'lashes',
 }
-export const WORKER_LEVEL = {
-  'Milica Jovanović': 'Senior · specijalista za boju',
-  'Jelena Nikolić':    'Specijalista za nokte',
-  'Ana Petrović':      'Specijalista za negu lica',
-  'Tijana Marković':   'Junior · trepavice i obrve',
-}
 export function catFor(roleSr) { return CATEGORY[ROLE_CATEGORY[roleSr]] || CATEGORY.hair }
 export function initials(n) { return n.split(' ').map(x => x[0]).join('') }

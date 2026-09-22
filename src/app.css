@@ -1,18 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root{
+  color-scheme: dark;
   --ink:#17131C; --ink2:#241E2B; --muted:#B7A9B4; --line:#3A2F3C; --bg:#1D1720; --card:#251E29;
-  --text:#F3E9EE; --rouge:#E27594; --rouge-d:#F0A9BC; --rouge-s:#3A2530; --ok:#5FAE85; --ok-s:#1E332A; --r:16px;
+  --text:#F3E9EE; --rouge:#E27594; --rouge-d:color-mix(in srgb, var(--rouge) 60%, white); --rouge-s:color-mix(in srgb, var(--rouge) 22%, var(--ink2)); --ok:#5FAE85; --ok-s:#1E332A; --r:16px;
   --sh:0 1px 2px rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.3);
 }
 *{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);
+#root{width:100%;max-width:none!important;margin:0!important;padding:0!important;text-align:left!important;border:0!important}
+body{background:var(--bg);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);
   display:flex;justify-content:center;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 a{color:inherit}
 
-.app-shell{width:100%;max-width:430px;margin:0 auto;background:var(--bg);color:var(--text);min-height:100dvh;position:relative;
+.app-shell{width:100%;max-width:none;margin:0 auto;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;position:relative;
   padding-bottom:calc(80px + env(safe-area-inset-bottom));overflow-x:hidden;display:flex;flex-direction:column}
 
 /* ============================================================ TOP BAR */
@@ -24,23 +27,29 @@ a{color:inherit}
 
 /* ============================================================ POČETNA — pun ekran, slika, dugme */
 .hero{
+  width:100%; box-sizing:border-box;
   position:relative; color:#fff; overflow:hidden;
-  flex:1; min-height:60dvh; display:flex; flex-direction:column;
+  flex:1; min-height:60vh;min-height:60dvh; display:flex; flex-direction:column;
   align-items:center; justify-content:flex-end; text-align:center;
   padding:32px 24px 40px;
   background:
-    linear-gradient(180deg, rgba(23,19,28,.10) 0%, rgba(23,19,28,.30) 45%, rgba(23,19,28,.94) 90%, var(--ink) 100%),
-    url('https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=1200&q=80') center 22%/cover no-repeat;
+    radial-gradient(120% 85% at 50% -8%, color-mix(in srgb, var(--rouge) 38%, transparent) 0%, transparent 62%),
+    var(--ink);
+}
+.hero.has-photo{
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 55%, var(--ink) 96%),
+    var(--gate-photo) center/cover no-repeat;
 }
 .hero .mark{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#D8C7CF;text-shadow:0 1px 6px rgba(0,0,0,.4)}
 .hero h1{font-family:Fraunces,serif;font-weight:600;font-size:44px;margin:10px 0 12px;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 .hero p{color:#EFE8EB;font-size:14px;margin:0 0 24px;line-height:1.55;max-width:30ch;text-shadow:0 1px 8px rgba(0,0,0,.35)}
-.hero .cta{display:inline-block;background:var(--rouge);color:#fff;border:0;border-radius:999px;
+.hero .cta, .gate-hero .cta{display:inline-block;background:var(--rouge);color:#fff;border:0;border-radius:6px;
   padding:17px 42px;font-weight:700;font-size:16px;box-shadow:0 10px 28px rgba(168,50,79,.45)}
-.hero .cta:hover{box-shadow:0 14px 34px rgba(168,50,79,.55);transform:translateY(-1px)}
-.hero .cta:active{transform:scale(.96)}
+.hero .cta:hover, .gate-hero .cta:hover{box-shadow:0 14px 34px rgba(168,50,79,.55);transform:translateY(-1px)}
+.hero .cta:active, .gate-hero .cta:active{transform:scale(.96)}
 
-.homedark{background:var(--ink);color:#fff;padding:24px 20px 34px}
+.homedark{width:100%;box-sizing:border-box;background:var(--ink);color:#fff;padding:24px 20px 34px}
 .homedark .eyebrow{color:#B6A9B4;margin-top:0}
 .homedark .eyebrow:after{background:#3B3244}
 .info-dark{display:flex;align-items:center;gap:12px;background:#241E29;border:1px solid #362E3D;border-radius:14px;
@@ -68,8 +77,9 @@ a{color:inherit}
 .tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--rouge-s);color:var(--rouge-d);border:0}
 .tag.g{background:var(--ok-s);color:var(--ok)}
 .tag.n{background:var(--line);color:var(--text)}
-.ghost{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600}
-.btn{width:100%;padding:15px;border-radius:14px;border:0;background:var(--rouge);color:#fff;font-weight:700;font-size:15px;
+.ghost{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;transition:transform .12s}
+.ghost:active:not(:disabled){transform:scale(.97)}
+.btn{width:100%;padding:15px;border-radius:6px;border:0;background:var(--rouge);color:#fff;font-weight:700;font-size:15px;
   box-shadow:0 4px 14px rgba(168,50,79,.25)}
 .btn:disabled{opacity:.6}
 .btn:hover:not(:disabled){box-shadow:0 6px 20px rgba(168,50,79,.35);transform:translateY(-1px)}
@@ -96,13 +106,14 @@ a{color:inherit}
 .calhead button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--ink2);color:var(--text)}
 .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .dow{text-align:center;font-size:10px;color:var(--muted);font-weight:700}
-.cell{aspect-ratio:1;border-radius:10px;border:1px solid var(--line);background:var(--ink2);color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
-.cell.none{background:var(--bg);color:#5C525F;border-color:transparent}
-.cell.on{background:var(--rouge);border-color:var(--rouge);color:#fff}
-.cell:not(:disabled):not(.none):hover{border-color:var(--rouge);transform:scale(1.06)}
+.cell{aspect-ratio:1;border-radius:10px;border:0;background:none;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.cell.none{background:none;color:#5C525F}
+.cell.on{background:var(--rouge);color:#fff}
+.cell:not(:disabled):not(.none):hover{transform:scale(1.06)}
 .cell:active:not(:disabled){transform:scale(.94)}
-.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
-.slot{border:1px solid var(--line);background:var(--ink2);color:var(--text);border-radius:11px;padding:10px 0;font-weight:700;font-variant-numeric:tabular-nums}
+.slots{display:flex;overflow-x:auto;gap:8px;margin-bottom:10px;padding-bottom:2px;scrollbar-width:none}
+.slots::-webkit-scrollbar{display:none}
+.slot{border:1px solid var(--line);background:var(--ink2);color:var(--text);border-radius:11px;padding:10px 16px;font-weight:700;font-variant-numeric:tabular-nums;flex:none}
 .slot.on{background:var(--rouge);border-color:var(--rouge);color:#fff;box-shadow:0 4px 12px rgba(168,50,79,.3)}
 .slot:not(:disabled):hover{border-color:var(--rouge);transform:translateY(-2px)}
 .slot:active{transform:scale(.95)}
@@ -118,10 +129,12 @@ a{color:inherit}
 .notif .dot{width:8px;height:8px;border-radius:50%;background:var(--rouge);flex:none;margin-top:6px}
 
 /* ============================================================ DONJA TRAKA */
-.tabs{position:fixed;bottom:0;width:100%;max-width:430px;background:rgba(29,23,32,.92);backdrop-filter:blur(14px);
+.tabs{position:fixed;bottom:0;width:100%;max-width:none;background:rgba(29,23,32,.92);backdrop-filter:blur(14px);
   border-top:1px solid var(--line);display:flex;padding:7px 4px calc(10px + env(safe-area-inset-bottom));z-index:30}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;
-  color:var(--muted);font-weight:600;min-height:52px;padding:4px 2px;transition:color .15s ease}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;
+  color:var(--muted);font-weight:600;min-height:52px;padding:4px 1px;transition:color .15s ease;
+  white-space:nowrap;letter-spacing:-.01em}
+.tabs button span:not(.i){overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tabs button.on{color:var(--rouge)}
 .tabs .i{font-size:18px;line-height:1;display:inline-block;transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
 .tabs button.on .i{transform:scale(1.15)}
@@ -135,7 +148,7 @@ button:active{transform:scale(.97)}
 
 /* ============================================================ USLUGE — mreža radnika, cenovnik */
 .wpick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.wpick-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:left;box-shadow:var(--sh)}
+.wpick-card{background:var(--card);border:1px solid var(--line);border-radius:18px;text-align:left;box-shadow:var(--sh)}
 .wpick-card img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .wpick-info{padding:10px 11px 12px}
 .wpick-level{display:block;font-size:10.5px;color:var(--rouge-d);font-weight:700;text-transform:uppercase;
@@ -152,14 +165,14 @@ button:active{transform:scale(.97)}
   border-radius:14px;padding:10px;margin-bottom:8px}
 .svcrow img{width:54px;height:54px;border-radius:11px;object-fit:cover;flex:none}
 .svcrow.sel{border-color:var(--rouge);background:var(--rouge-s)}
-.svcrow-btn{font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:11px;background:var(--rouge);color:#fff;flex:none}
+.svcrow-btn{font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:6px;background:var(--rouge);color:#fff;flex:none}
 .svcrow-btn:active{transform:scale(.94)}
 .chk-round{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--ink2);
   color:var(--ink2);font-size:13px;flex:none}
 .chk-round.sel{background:var(--rouge);border-color:var(--rouge)}
 
 .selectbar{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:0;right:0;margin:0 auto;
-  width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--line);padding:12px 16px;
+  width:100%;max-width:none;background:var(--card);border-top:1px solid var(--line);padding:12px 16px;
   display:flex;align-items:center;gap:8px;box-shadow:0 -6px 20px rgba(0,0,0,.3);z-index:25}
 
 .notefield{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px;font:inherit;
@@ -169,13 +182,129 @@ button:active{transform:scale(.97)}
 
 /* ============================================================ AVATARI SA INICIJALIMA (bez tuđih fotografija) */
 .wpick-avatar{width:100%;aspect-ratio:1/1;display:grid;place-items:center;color:#fff;
-  font-family:Fraunces,serif;font-size:30px;font-weight:600}
+  border-radius:18px 18px 0 0;font-family:Fraunces,serif;font-size:30px;font-weight:600}
 .wthumb-avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;
   font-family:Fraunces,serif;font-size:17px;font-weight:600;flex:none;box-shadow:0 2px 8px rgba(23,19,28,.15)}
 .svcicon{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;color:#fff;
-  font-size:20px;flex:none}
+  font-size:20px;flex:none;overflow:hidden}
+.svcicon-photo{width:100%;height:100%;object-fit:cover}
 
 /* ============================================================ JEZIK SR/EN */
 .lang{margin-left:10px;display:flex;border:1px solid #3A2F3C;background:#241E29;border-radius:999px;padding:2px}
 .lang button{padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--muted)}
 .lang button.on{background:var(--rouge);color:#fff}
+/* ============================================================ SUCCESS EKRAN (potvrda termina) */
+.success-screen{position:fixed; inset:0; z-index:60; background:var(--ink);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px}
+.success-circle{width:84px; height:84px; border-radius:50%; background:var(--ok, #3F9A6B);
+  display:grid; place-items:center; box-shadow:0 10px 34px rgba(63,154,107,.45)}
+.success-screen p{color:#fff; font-family:Fraunces,serif; font-size:19px; margin:0}
+
+/* ============================================================ TERMINI — podtabovi i next/previous */
+.subtabs{display:flex; gap:6px; background:var(--ink2); border-radius:12px; padding:4px; margin-bottom:16px}
+.subtabs button{flex:1; padding:9px; border-radius:9px; border:0; background:none; color:var(--muted);
+  font-weight:600; font-size:13.5px; transition:transform .12s}
+.subtabs button.on{background:var(--rouge); color:#fff}
+.subtabs button:active{transform:scale(.95)}
+.apptnav{display:flex; align-items:center; justify-content:space-between; margin-top:14px}
+.apptnav button:disabled{opacity:.35}
+
+/* ============================================================ ULAZNI GATE EKRAN */
+.gate{width:100%;max-width:none;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.gate-hero{
+  width:100%; box-sizing:border-box;
+  position:relative; color:var(--text); overflow:hidden;
+  flex:1; min-height:55vh;min-height:55dvh; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end; text-align:center;
+  padding:32px 24px 40px;
+  background:
+    radial-gradient(120% 85% at 50% -8%, color-mix(in srgb, var(--rouge) 38%, transparent) 0%, transparent 62%),
+    var(--ink);
+}
+.gate-hero.has-photo{
+  color:#fff;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 55%, var(--ink) 96%),
+    var(--gate-photo) center/cover no-repeat;
+}
+.gate-eyebrow{font-size:11px; letter-spacing:.35em; color:var(--muted); margin-bottom:6px}
+.gate-name{font-family:Fraunces,serif;font-weight:600;font-size:26px;letter-spacing:2px;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.gate-rule{width:34px;height:1px;background:color-mix(in srgb, var(--rouge) 55%, transparent);margin:14px 0 22px}
+
+.info-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.info-tile{display:flex; flex-direction:column; align-items:center; gap:7px; background:var(--ink2);
+  border-radius:10px; padding:14px 8px; color:var(--rouge); text-align:center}
+.info-tile span{color:var(--muted); font-size:11px}
+.info-tile.wide{grid-column:1 / -1}
+.info-tile:active{transform:scale(.97)}
+
+.skel{background:linear-gradient(100deg, var(--ink2) 30%, rgba(255,255,255,.06) 50%, var(--ink2) 70%);
+  background-size:220% 100%; animation:shimmer 1.3s ease-in-out infinite}
+.skel-circle{width:64px;height:64px;border-radius:50%;margin:0 auto}
+.skel-card{pointer-events:none}
+@keyframes shimmer{ from{background-position:130% 0} to{background-position:-30% 0} }
+@media (prefers-reduced-motion:reduce){ .skel{animation:none;opacity:.6} }
+
+/* ============================================================ IZBOR RADNIKA — select pa nastavi */
+.wpick-card{position:relative; transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s}
+.wpick-card.sel{outline:2px solid var(--rouge); outline-offset:-2px; box-shadow:0 0 0 4px var(--rouge-s)}
+.wpick-card.sel::after{content:'✓'; position:absolute; top:8px; right:8px; width:22px; height:22px;
+  border-radius:50%; background:var(--rouge); color:#fff; font-size:12px; font-weight:700;
+  display:grid; place-items:center; animation:popIn .22s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{ from{transform:scale(0)} to{transform:scale(1)} }
+.continuebar{position:fixed; bottom:calc(70px + env(safe-area-inset-bottom)); left:0; right:0; width:100%; max-width:none; margin:0 auto;
+  padding:12px 16px; background:rgba(29,23,32,.92); backdrop-filter:blur(14px);
+  box-shadow:0 -6px 20px rgba(0,0,0,.3); z-index:24; animation:slideUp .22s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideUp{ from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)} }
+
+/* ============================================================ SETTINGS TAB */
+.settings-list{display:flex; flex-direction:column; gap:2px}
+.settings-row{display:flex; align-items:center; gap:12px; padding:15px 4px; background:none; border:0;
+  border-bottom:1px solid var(--line); color:var(--text); font:inherit; text-align:left; width:100%}
+.settings-row:active{background:var(--ink2)}
+.settings-row .chev{margin-left:auto; color:var(--muted)}
+.s-ic{width:24px; height:24px; border-radius:6px; background:var(--ink2); display:inline-flex;
+  align-items:center; justify-content:center; margin-right:11px; color:var(--muted); flex:none}
+.settings-row.danger .s-ic{color:var(--rouge)}
+.settings-row.danger{color:var(--rouge)}
+.settings-modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  z-index:40; display:flex; align-items:flex-end; justify-content:center}
+.settings-modal{width:100%; max-width:none; background:var(--card); border-radius:22px 22px 0 0;
+  padding:8px 20px calc(28px + env(safe-area-inset-bottom)); max-height:80vh;max-height:80dvh; overflow-y:auto; touch-action:none}
+.sheet-handle{width:36px; height:4px; border-radius:99px; background:var(--line); margin:6px auto 14px}
+.sheet-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+.sheet-header b{font-family:Fraunces,serif; font-size:19px}
+.sheet-close{width:30px; height:30px; border-radius:50%; background:var(--ink2); color:var(--text);
+  font-size:13px; display:grid; place-items:center; border:0}
+.sheet-close:active{transform:scale(.88)}
+.sheet-body{touch-action:pan-y}
+
+/* ============================================================ LOGIN / REGISTRACIJA EKRAN */
+.auth-screen{width:100%;max-width:none; margin:0 auto; min-height:100vh;min-height:100dvh; display:flex; align-items:center;
+  position:relative; background:var(--ink); color:var(--text); padding:0 26px}
+.auth-back{position:absolute; top:calc(16px + env(safe-area-inset-top)); left:26px; width:auto;
+  padding:9px 14px; font-size:13px}
+.auth-card{width:100%}
+.auth-card .mark{font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted)}
+.auth-card h1{font-family:Fraunces,serif; font-weight:600; font-size:40px; margin:8px 0 26px}
+.f{width:100%; padding:14px; border-radius:12px; border:1px solid var(--line); background:var(--ink2);
+  color:var(--text); font:inherit; transition:border-color .15s}
+.f:focus{outline:none; border-color:var(--rouge)}
+.f-pass-wrap{position:relative}
+.f-pass-toggle{position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none;
+  border:0; padding:6px 10px; font-size:12px; font-weight:600; color:var(--muted); opacity:.85}
+.f-pass-toggle:active{opacity:1; transform:translateY(-50%) scale(.9)}
+.link{margin-top:14px; background:none; border:0; color:#F0A9BC; font-size:13.5px}
+.err{color:#F0A9BC; font-size:13px; margin:0}
+
+/* ============================================================ SLIKA RADNIKA (kad postoji, umesto inicijala) */
+.wpick-photo{width:100%; height:100%; object-fit:cover; border-radius:18px 18px 0 0; display:block}
+.wthumb-photo{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block}
+
+/* ============================================================ GOOGLE/APPLE LOGIN DUGMAD */
+.oauth-btn{width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:13px; border-radius:6px; border:1px solid var(--line); background:#fff; color:#1f1f1f;
+  font-weight:600; font-size:14.5px; cursor:pointer; transition:transform .12s}
+.oauth-btn:active:not(:disabled){transform:scale(.98)}
+.oauth-btn:disabled{opacity:.6}
+.oauth-btn.dark{background:#000; color:#fff; border-color:#000}

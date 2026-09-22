@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
-import { CATEGORY, catFor, WORKER_LEVEL, initials } from './images'
+import { CATEGORY, catFor, initials } from './images'
 import { useLang } from './lib/i18n'
+import { SkeletonWorkerGrid, SkeletonRows } from './Skeleton'
+import { haptic } from './lib/haptic'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { createPortal } from 'react-dom'
 
 const din = v => v.toLocaleString('sr-RS') + ' din'
 const dur = m => m>=60 ? (m%60 ? Math.floor(m/60)+'h '+(m%60)+'min' : Math.floor(m/60)+'h') : m+'min'
 
 export default function Services({ salon, openWorkerId, onBookWith }) {
   const { t } = useLang()
-  const [workers, setWorkers] = useState([])
+  const [workers, setWorkers] = useState(null)
   const [active, setActive] = useState(null)
+  const [picked, setPicked] = useState(null)   // worker koji je selektovan (zasivljen), pre "Nastavi"
 
   useEffect(() => {
     supabase.from('workers').select('*').eq('salon_id', salon.id).eq('active', true).order('sort')
@@ -17,33 +22,73 @@ export default function Services({ salon, openWorkerId, onBookWith }) {
   }, [salon.id])
 
   useEffect(() => {
-    if (openWorkerId && workers.length) setActive(workers.find(w => w.id === openWorkerId) || null)
+    if (openWorkerId && workers && workers.length) setActive(workers.find(w => w.id === openWorkerId) || null)
   }, [openWorkerId, workers])
 
-  if (active) {
-    return <PriceList worker={active} onBack={() => setActive(null)} onBookWith={onBookWith} />
+  if (workers === null) {
+    return (
+      <div className="anim-in" style={{ padding: 16 }}>
+        <div className="pagehead"><h2>{t('servicesTitle')}</h2><p>{t('servicesSub')}</p></div>
+        <SkeletonWorkerGrid />
+      </div>
+    )
   }
 
   return (
-    <div className="anim-in" style={{ padding: 16 }}>
-      <div className="pagehead"><h2>{t('servicesTitle')}</h2><p>{t('servicesSub')}</p></div>
-      <div className="wpick-grid">
-        {workers.map(w => {
-          const c = catFor(w.role_sr)
-          return (
-            <button key={w.id} className="wpick-card" onClick={() => setActive(w)}>
-              <div className="wpick-avatar" style={{ background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
-                {initials(w.name)}
+    <LayoutGroup>
+      <AnimatePresence mode="popLayout">
+        {active ? (
+          <PriceList key="pricelist" worker={active} onBack={() => setActive(null)} onBookWith={onBookWith} />
+        ) : (
+          <motion.div key="grid"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            style={{ padding: 16, paddingBottom: picked ? 90 : 16 }}
+          >
+            <div className="pagehead"><h2>{t('servicesTitle')}</h2><p>{t('servicesSub')}</p></div>
+            <div className="wpick-grid">
+              {workers.map(w => {
+                const c = catFor(w.role_sr)
+                const sel = picked?.id === w.id
+                return (
+                  <button key={w.id} className={'wpick-card' + (sel ? ' sel' : '')}
+                    onClick={() => { haptic('tap'); setPicked(sel ? null : w) }}>
+                    {w.name ? (
+                      <motion.div layoutId={`avatar-${w.id}`} className="wpick-avatar"
+                        transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }}
+                        style={w.photo_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
+                        {w.photo_url ? <img src={w.photo_url} alt="" className="wpick-photo" /> : initials(w.name)}
+                      </motion.div>
+                    ) : (
+                      <motion.div layoutId={`avatar-${w.id}`} className="wpick-avatar skel"
+                        transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }} />
+                    )}
+                    <div className="wpick-info">
+                      {w.name ? (
+                        <>
+                          <span className="wpick-level">{w.role_sr}</span>
+                          <span className="name">{w.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="skel" style={{ display: 'block', height: 10, width: '55%', borderRadius: 4, marginBottom: 6 }} />
+                          <span className="skel" style={{ display: 'block', height: 12, width: '75%', borderRadius: 4 }} />
+                        </>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            {picked && createPortal((
+              <div className="continuebar">
+                <button className="btn" onClick={() => { setActive(picked); setPicked(null) }}>{t('continue')}</button>
               </div>
-              <div className="wpick-info">
-                <span className="wpick-level">{WORKER_LEVEL[w.name] || w.role_sr}</span>
-                <span className="name">{w.name}</span>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    </div>
+            ), document.body)}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </LayoutGroup>
   )
 }
 
@@ -54,7 +99,7 @@ function PriceList({ worker, onBack, onBookWith }) {
   const c = catFor(worker.role_sr)
 
   useEffect(() => {
-    supabase.from('services').select('*').eq('worker_id', worker.id).eq('active', true).order('sort')
+    supabase.from('services').select('*').eq('worker_id', worker.id).eq('active', true).eq('is_vip', false).order('sort')
       .then(({ data }) => setServices(data || []))
   }, [worker.id])
 
@@ -64,29 +109,63 @@ function PriceList({ worker, onBack, onBookWith }) {
   const total = services ? chosen.reduce((a,id) => a + services.find(s=>s.id===id).price_rsd, 0) : 0
 
   return (
-    <div className="anim-in" style={{ padding: 16, paddingBottom: chosen.length ? 90 : 16 }}>
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      style={{ padding: 16, paddingBottom: chosen.length ? 90 : 16 }}
+    >
       <button className="ghost" style={{ marginBottom: 12 }} onClick={onBack}>← Nazad</button>
 
       <div className="card row" style={{ marginBottom: 14 }}>
-        <div className="wthumb-avatar" style={{ background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
-          {initials(worker.name)}
-        </div>
-        <span className="grow">
-          <span className="name">{worker.name}</span><br/>
-          <span className="tiny">{WORKER_LEVEL[worker.name] || worker.role_sr}</span>
-        </span>
+        {worker.name ? (
+          <>
+            <motion.div layoutId={`avatar-${worker.id}`} className="wthumb-avatar"
+              transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }}
+              style={worker.photo_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
+              {worker.photo_url ? <img src={worker.photo_url} alt="" className="wthumb-photo" /> : initials(worker.name)}
+            </motion.div>
+            <span className="grow">
+              <span className="name">{worker.name}</span><br/>
+              <span className="tiny">{worker.role_sr}</span>
+            </span>
+          </>
+        ) : (
+          <>
+            <motion.div layoutId={`avatar-${worker.id}`} className="wthumb-avatar skel"
+              transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }} />
+            <span className="grow">
+              <span className="skel" style={{ display: 'block', height: 13, width: '50%', borderRadius: 4, marginBottom: 5 }} />
+              <span className="skel" style={{ display: 'block', height: 10, width: '35%', borderRadius: 4 }} />
+            </span>
+          </>
+        )}
         <button className={'multitoggle' + (multi ? ' on' : '')} onClick={toggleMulti}>
           {multi ? 'Poništi' : 'Izaberi više'}
         </button>
       </div>
 
-      {services === null ? <p className="tiny">Učitavanje…</p> : (
+      {services === null ? <SkeletonRows /> : services.length === 0 ? (
+        <div className="stack">
+          {[0, 1].map(i => (
+            <div key={i} className="svcrow">
+              <div className="svcicon skel" />
+              <span className="grow">
+                <span className="skel" style={{ display: 'block', height: 12, width: '60%', borderRadius: 4, marginBottom: 5 }} />
+                <span className="skel" style={{ display: 'block', height: 9, width: '30%', borderRadius: 4 }} />
+              </span>
+              <span className="skel" style={{ display: 'block', height: 12, width: 44, borderRadius: 4 }} />
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="stack">
           {services.map(s => {
             const sel = chosen.includes(s.id)
             return (
               <div key={s.id} className={'svcrow' + (sel ? ' sel' : '')}>
-                <div className="svcicon" style={{ background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>{c.icon}</div>
+                <div className="svcicon" style={s.image_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
+                  {s.image_url ? <img src={s.image_url} alt="" className="svcicon-photo" /> : c.icon}
+                </div>
                 <span className="grow">
                   <span className="name">{s.name_sr}</span><br/>
                   <span className="tiny">{dur(s.duration_min)}</span>
@@ -103,7 +182,7 @@ function PriceList({ worker, onBack, onBookWith }) {
         </div>
       )}
 
-      {multi && chosen.length > 0 && (
+      {multi && chosen.length > 0 && createPortal((
         <div className="selectbar">
           <span>{chosen.length} {chosen.length===1?'usluga':'usluge'}</span>
           <b className="grow" style={{textAlign:'right', marginRight:12}}>{din(total)}</b>
@@ -111,7 +190,7 @@ function PriceList({ worker, onBack, onBookWith }) {
             Nastavi
           </button>
         </div>
-      )}
-    </div>
+      ), document.body)}
+    </motion.div>
   )
 }

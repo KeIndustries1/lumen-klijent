@@ -7,11 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android": "vite build && npx cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
     "@supabase/supabase-js": "^2.112.3",
     "framer-motion": "^13.1.1",
+    "lucide-react": "^1.47.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
