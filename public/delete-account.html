@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Brisanje naloga — Lumen</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --ink:#17131C; --text:#2B2530; --muted:#6B6270; --line:#E4DEE6; --rouge:#A8324F; --bg:#FDFBFC;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink:#F3E9EE; --text:#EDE7EF; --muted:#B7A9B4; --line:#3A2F3C; --rouge:#E27594; --bg:#17131C; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:Georgia,'Plus Jakarta Sans',system-ui,serif;line-height:1.7;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:48px 24px 80px}
+  h1{font-size:26px;margin:0 0 24px;color:var(--ink)}
+  h2{font-size:17px;color:var(--ink);margin:30px 0 10px;font-family:system-ui,sans-serif}
+  p, li{font-size:15px;color:var(--text)}
+  ol{padding-left:20px}
+  li{margin-bottom:8px}
+  a{color:var(--rouge)}
+  .box{margin-top:16px;padding:18px 20px;border:1px solid var(--line);border-radius:10px;font-family:system-ui,sans-serif;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Brisanje naloga i podataka</h1>
+  <p>Korisnici Lumen aplikacije mogu u svakom trenutku da zatraže brisanje svog naloga i svih podataka povezanih sa njim (ime, email, broj telefona, istorija termina).</p>
+
+  <h2>Opcija 1 — direktno u aplikaciji (odmah)</h2>
+  <ol>
+    <li>Otvorite Lumen aplikaciju i prijavite se na svoj nalog.</li>
+    <li>Idite na <strong>Podešavanja</strong>.</li>
+    <li>Izaberite <strong>Obriši profil</strong>.</li>
+    <li>Potvrdite — nalog i svi podaci se odmah i trajno brišu.</li>
+  </ol>
+
+  <h2>Opcija 2 — ako ne možete da pristupite aplikaciji</h2>
+  <p>Pošaljite email na adresu ispod, sa email adresom koju ste koristili za nalog. Vaš nalog i podaci će biti obrisani u roku od <strong>7 dana</strong>.</p>
+  <div class="box">
+    <a href="mailto:kojasobiz@gmail.com?subject=Zahtev%20za%20brisanje%20naloga">kojasobiz@gmail.com</a>
+  </div>
+
+  <h2>Šta se briše</h2>
+  <ul>
+    <li>Ime i prezime</li>
+    <li>Email adresa</li>
+    <li>Broj telefona</li>
+    <li>Istorija zakazanih termina</li>
+  </ul>
+</div>
+</body>
+</html>
