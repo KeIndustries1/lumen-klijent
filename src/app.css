@@ -360,3 +360,20 @@ html.no-scroll, html.no-scroll body{overflow:hidden;overscroll-behavior:none;hei
 /* Slika usluge: veci kvadrat sa zaobljenim uglovima, slika popunjava ceo okvir */
 .svcrow .svcicon{width:84px;height:84px;border-radius:14px;overflow:hidden;flex:none;display:grid;place-items:center}
 .svcrow .svcicon > img.svcicon-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:0}
+
+/* ============================================================ KARTICA RADNIKA — "osoba": glava je slika, telo nosi ime i opis */
+.wpick-grid{gap:14px 12px}
+.wpick-card.person{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.wpick-card.person:hover{transform:none;box-shadow:none}
+.wpick-card.person:active{transform:scale(.97)}
+.person-head{position:relative;z-index:2;width:92px;height:92px;border-radius:50%;overflow:hidden;
+  display:grid;place-items:center;background:var(--ink2);color:#fff;
+  font-family:Fraunces,serif;font-size:28px;font-weight:600;
+  border:3px solid var(--bg);box-shadow:0 8px 20px rgba(0,0,0,.35);margin-bottom:-30px}
+.person-head img{width:100%;height:100%;object-fit:cover;display:block}
+.person-body{width:100%;min-height:118px;border:1px solid var(--line);
+  border-radius:70px 70px 18px 18px;padding:40px 10px 16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.person-body .name{font-size:14.5px;font-weight:600;color:var(--text);line-height:1.25}
+.person-role{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--rouge)}

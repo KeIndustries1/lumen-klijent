@@ -50,28 +50,29 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
               {workers.map(w => {
                 const c = catFor(w.role_sr)
                 return (
-                  <button key={w.id} className="wpick-card"
+                  <button key={w.id} className="wpick-card person"
                     onClick={() => { haptic('tap'); setActive(w) }}>
                     {w.name ? (
-                      <motion.div layoutId={`avatar-${w.id}`} className="wpick-avatar"
+                      <motion.div layoutId={`avatar-${w.id}`} className="person-head"
                         transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }}
                         style={w.photo_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
-                        {w.photo_url ? <img src={w.photo_url} alt="" className="wpick-photo" /> : initials(w.name)}
+                        {w.photo_url ? <img src={w.photo_url} alt="" /> : initials(w.name)}
                       </motion.div>
                     ) : (
-                      <motion.div layoutId={`avatar-${w.id}`} className="wpick-avatar skel"
+                      <motion.div layoutId={`avatar-${w.id}`} className="person-head skel"
                         transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }} />
                     )}
-                    <div className="wpick-info">
+                    <div className="person-body"
+                      style={{ background: `linear-gradient(180deg, ${c.from}55 0%, var(--card) 70%)` }}>
                       {w.name ? (
                         <>
-                          <span className="wpick-level">{w.role_sr}</span>
                           <span className="name">{w.name}</span>
+                          <span className="person-role">{w.role_sr}</span>
                         </>
                       ) : (
                         <>
-                          <span className="skel" style={{ display: 'block', height: 10, width: '55%', borderRadius: 4, marginBottom: 6 }} />
-                          <span className="skel" style={{ display: 'block', height: 12, width: '75%', borderRadius: 4 }} />
+                          <span className="skel" style={{ display: 'block', height: 12, width: '70%', borderRadius: 4, margin: '0 auto 8px' }} />
+                          <span className="skel" style={{ display: 'block', height: 10, width: '50%', borderRadius: 4, margin: '0 auto' }} />
                         </>
                       )}
                     </div>
