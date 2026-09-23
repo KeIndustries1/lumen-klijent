@@ -8,6 +8,7 @@ import Booking from './Booking'
 import Appointments from './Appointments'
 import Notifications from './Notifications'
 import { motion, AnimatePresence } from 'framer-motion'
+import { GearLoader } from './Skeleton'
 import { createPortal } from 'react-dom'
 import { LangProvider, useLang } from './lib/i18n'
 import { applyTheme } from './lib/themes'
@@ -51,7 +52,7 @@ export default function App() {
 
   if (session === undefined || !salon) return <Loading />
   if (!session) return <AuthScreen salon={salon} />
-  if (!entered) return <Gate salon={salon} onEnter={() => setEntered(true)} />
+  if (!entered) return <Home salon={salon} standalone onBook={() => setEntered(true)} />
   if (client === undefined) return <Loading />
   if (!client || !client.phone) {
     return (
@@ -77,51 +78,9 @@ export default function App() {
 // ============================================================
 import { AtSign, Phone, MapPin, User, Info, Shield, FileText, Trash2, LogOut } from 'lucide-react'
 
-function Gate({ salon, onEnter }) {
-  const igHandle = salon.instagram?.replace('@', '')
-  return (
-    <div className="gate">
-      <div className={'gate-hero' + (salon.hero_image_url ? ' has-photo' : '')}
-        style={salon.hero_image_url ? { '--gate-photo': `url(${salon.hero_image_url})` } : undefined}>
-        <div className="gate-eyebrow">SALON</div>
-        <div className="gate-name">{salon.name?.toUpperCase().split('').join(' ')}</div>
-        <div className="gate-rule" />
-        <button className="cta" onClick={onEnter} style={{
-          display: 'inline-block', background: 'var(--rouge, #A8324F)', color: '#fff', border: '1px solid rgba(255,255,255,.14)',
-          borderRadius: 4, padding: '16px 52px', fontWeight: 600, fontSize: 13,
-          letterSpacing: '3px', textTransform: 'uppercase',
-          boxShadow: '0 14px 34px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.18)', cursor: 'pointer',
-        }}>Login</button>
-      </div>
-      <div className="homedark">
-        <div className="eyebrow">Info</div>
-        <div className="info-grid">
-          {salon.instagram && (
-            <a className="info-tile" href={`https://instagram.com/${igHandle}`} target="_blank" rel="noreferrer">
-              <AtSign size={16} strokeWidth={1.75} />
-              <span>{salon.instagram}</span>
-            </a>
-          )}
-          {salon.phone && (
-            <a className="info-tile" href={`tel:${salon.phone.replace(/\s/g, '')}`}>
-              <Phone size={16} strokeWidth={1.75} />
-              <span>{salon.phone}</span>
-            </a>
-          )}
-          {salon.address && (
-            <a className="info-tile wide" href={`https://maps.google.com/?q=${encodeURIComponent(salon.address)}`} target="_blank" rel="noreferrer">
-              <MapPin size={16} strokeWidth={1.75} />
-              <span>{salon.address}</span>
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function Loading() {
-  return <div style={{ padding: 40, fontFamily: 'sans-serif', color: '#6B6274' }}>Učitavanje…</div>
+  return <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}><GearLoader /></div>
 }
 
 function LangSwitch() {
@@ -139,8 +98,17 @@ function MainApp({ client, salon }) {
   // page: 'home' | 'services' | 'termini' | 'notif' | 'settings'
   // booking: kad nije null, prikazuje se preko svega — { worker, serviceIds }
   const [page, setPage] = useState('services')
+  const [svcActive, setSvcActive] = useState(false)
+
   const [openWorkerId, setOpenWorkerId] = useState(null)
   const [booking, setBooking] = useState(null)
+  // Izbor radnika i Podesavanja staju na jedan ekran — bez skrolovanja.
+  useEffect(() => {
+    const lock = !booking && (page === 'settings' || (page === 'services' && !svcActive))
+    document.documentElement.classList.toggle('no-scroll', lock)
+    window.scrollTo(0, 0)
+    return () => document.documentElement.classList.remove('no-scroll')
+  }, [page, svcActive, booking])
 
   return (
     <div className="app-shell">
@@ -157,26 +125,24 @@ function MainApp({ client, salon }) {
           onDone={() => { setBooking(null); setPage('termini') }}
         />
       ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={page}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {page === 'home' && (
-              <Home salon={salon} onBook={() => { setOpenWorkerId(null); setPage('services') }} />
-            )}
-            {page === 'services' && (
-              <Services salon={salon} openWorkerId={openWorkerId}
-                onBookWith={(w, serviceIds) => setBooking({ worker: w, serviceIds })} />
-            )}
-            {page === 'termini' && <Appointments client={client} />}
-            {page === 'notif' && <Notifications client={client} salon={salon} />}
-            {page === 'settings' && <Settings client={client} />}
-          </motion.div>
-        </AnimatePresence>
+        <div className="tabpage-stack">
+          <div style={{ display: page === 'home' ? 'block' : 'none' }}>
+            <Home salon={salon} onBook={() => { setOpenWorkerId(null); setPage('services') }} />
+          </div>
+          <div style={{ display: page === 'services' ? 'block' : 'none' }}>
+            <Services salon={salon} openWorkerId={openWorkerId} onActiveChange={setSvcActive}
+              onBookWith={(w, serviceIds) => setBooking({ worker: w, serviceIds })} />
+          </div>
+          <div style={{ display: page === 'termini' ? 'block' : 'none' }}>
+            <Appointments client={client} />
+          </div>
+          <div style={{ display: page === 'notif' ? 'block' : 'none' }}>
+            <Notifications client={client} salon={salon} />
+          </div>
+          <div style={{ display: page === 'settings' ? 'block' : 'none' }}>
+            <Settings client={client} />
+          </div>
+        </div>
       )}
 
       {!booking && (
@@ -238,8 +204,6 @@ function Settings({ client }) {
       <div className="settings-list">
         <button className="settings-row" onClick={() => open('profile')}><span className="s-ic"><User size={13} strokeWidth={1.75} /></span>{t('myProfile')}<span className="chev">›</span></button>
         <button className="settings-row" onClick={() => open('about')}><span className="s-ic"><Info size={13} strokeWidth={1.75} /></span>{t('aboutApp')}<span className="chev">›</span></button>
-        <button className="settings-row" onClick={() => open('privacy')}><span className="s-ic"><Shield size={13} strokeWidth={1.75} /></span>{t('privacyPolicy')}<span className="chev">›</span></button>
-        <button className="settings-row" onClick={() => open('terms')}><span className="s-ic"><FileText size={13} strokeWidth={1.75} /></span>{t('termsOfUse')}<span className="chev">›</span></button>
         <button className="settings-row danger" onClick={() => open('delete')}><span className="s-ic"><Trash2 size={13} strokeWidth={1.75} /></span>{t('deleteAccount')}<span className="chev">›</span></button>
         <button className="settings-row" onClick={() => { haptic('tap'); supabase.auth.signOut() }}><span className="s-ic"><LogOut size={13} strokeWidth={1.75} /></span>{t('signOut')}</button>
       </div>
@@ -263,8 +227,6 @@ function Settings({ client }) {
             <div className="sheet-body">
               {modal === 'profile' && <Profile client={client} />}
               {modal === 'about' && <p>{t('aboutAppBody')}</p>}
-              {modal === 'privacy' && <p>{t('privacyBody')}</p>}
-              {modal === 'terms' && <p>{t('termsBody')}</p>}
               {modal === 'delete' && (
                 <div>
                   <p style={{ color: 'var(--rouge)' }}>{t('deleteConfirm')}</p>

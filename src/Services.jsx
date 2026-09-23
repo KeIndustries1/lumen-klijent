@@ -10,11 +10,11 @@ import { createPortal } from 'react-dom'
 const din = v => v.toLocaleString('sr-RS') + ' din'
 const dur = m => m>=60 ? (m%60 ? Math.floor(m/60)+'h '+(m%60)+'min' : Math.floor(m/60)+'h') : m+'min'
 
-export default function Services({ salon, openWorkerId, onBookWith }) {
+export default function Services({ salon, openWorkerId, onBookWith, onActiveChange }) {
   const { t } = useLang()
   const [workers, setWorkers] = useState(null)
   const [active, setActive] = useState(null)
-  const [picked, setPicked] = useState(null)   // worker koji je selektovan (zasivljen), pre "Nastavi"
+  useEffect(() => { onActiveChange?.(!!active) }, [active])
 
   useEffect(() => {
     supabase.from('workers').select('*').eq('salon_id', salon.id).eq('active', true).order('sort')
@@ -43,16 +43,15 @@ export default function Services({ salon, openWorkerId, onBookWith }) {
           <motion.div key="grid"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            style={{ padding: 16, paddingBottom: picked ? 90 : 16 }}
+            style={{ padding: 16 }}
           >
             <div className="pagehead"><h2>{t('servicesTitle')}</h2><p>{t('servicesSub')}</p></div>
             <div className="wpick-grid">
               {workers.map(w => {
                 const c = catFor(w.role_sr)
-                const sel = picked?.id === w.id
                 return (
-                  <button key={w.id} className={'wpick-card' + (sel ? ' sel' : '')}
-                    onClick={() => { haptic('tap'); setPicked(sel ? null : w) }}>
+                  <button key={w.id} className="wpick-card"
+                    onClick={() => { haptic('tap'); setActive(w) }}>
                     {w.name ? (
                       <motion.div layoutId={`avatar-${w.id}`} className="wpick-avatar"
                         transition={{ layout: { type: 'spring', stiffness: 380, damping: 34 } }}
@@ -80,11 +79,6 @@ export default function Services({ salon, openWorkerId, onBookWith }) {
                 )
               })}
             </div>
-            {picked && createPortal((
-              <div className="continuebar">
-                <button className="btn" onClick={() => { setActive(picked); setPicked(null) }}>{t('continue')}</button>
-              </div>
-            ), document.body)}
           </motion.div>
         )}
       </AnimatePresence>
@@ -114,7 +108,9 @@ function PriceList({ worker, onBack, onBookWith }) {
       transition={{ duration: 0.18 }}
       style={{ padding: 16, paddingBottom: chosen.length ? 90 : 16 }}
     >
-      <button className="ghost" style={{ marginBottom: 12 }} onClick={onBack}>← Nazad</button>
+      <button className="backbtn" onClick={onBack}>‹ Nazad</button>
+
+      <div className="pagehead" style={{ marginBottom: 14 }}><h2>Usluge i cene</h2></div>
 
       <div className="card row" style={{ marginBottom: 14 }}>
         {worker.name ? (
@@ -166,11 +162,11 @@ function PriceList({ worker, onBack, onBookWith }) {
                 <div className="svcicon" style={s.image_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
                   {s.image_url ? <img src={s.image_url} alt="" className="svcicon-photo" /> : c.icon}
                 </div>
-                <span className="grow">
-                  <span className="name">{s.name_sr}</span><br/>
-                  <span className="tiny">{dur(s.duration_min)}</span>
+                <span className="grow svc-text">
+                  <span className="name">{s.name_sr}</span>
+                  <span className="svc-meta">{dur(s.duration_min)}</span>
+                  <span className="svc-price">{din(s.price_rsd)}</span>
                 </span>
-                <span className="price">{din(s.price_rsd)}</span>
                 {multi ? (
                   <button className={'chk-round' + (sel ? ' sel' : '')} onClick={() => toggle(s.id)}>{sel ? '✓' : ''}</button>
                 ) : (

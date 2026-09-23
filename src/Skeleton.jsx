@@ -1,3 +1,4 @@
+import { Settings as Gear } from 'lucide-react'
 // ============================================================
 // Skeleton loading blokovi — zamena za "Učitavanje…" tekst.
 // Svaki blok je siva kartica koja "pulsira" (shimmer) dok se
@@ -22,23 +23,19 @@ export function SkeletonCard({ lines = 2 }) {
 
 // Grid skeleton za izbor radnika (2 kolone, kao wpick-grid)
 export function SkeletonWorkerGrid({ count = 4 }) {
-  return (
-    <div className="wpick-grid">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="wpick-card skel-card" style={{ padding: 14 }}>
-          <div className="skel skel-circle" />
-          <SkeletonLine w="70%" style={{ margin: '10px auto 0' }} />
-        </div>
-      ))}
-    </div>
-  )
+  return <GearLoader />
 }
 
 // Lista skeleton redova (za usluge, termine, itd.)
 export function SkeletonRows({ count = 3 }) {
+  return <GearLoader />
+}
+
+// Mali zupcanik koji se okrece dok se sadrzaj ucitava.
+export function GearLoader() {
   return (
-    <div className="stack">
-      {Array.from({ length: count }).map((_, i) => <SkeletonCard key={i} lines={1} />)}
+    <div className="gear-loader" role="status" aria-label="Učitavanje">
+      <Gear size={26} strokeWidth={1.75} />
     </div>
   )
 }
