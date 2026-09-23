@@ -347,10 +347,11 @@ html.no-scroll, html.no-scroll body{overflow:hidden;overscroll-behavior:none;hei
 /* ============================================================ SLIKE — RADNICI I USLUGE (jedino mesto za ova pravila) */
 /* Kartica radnika: okvir iste velicine, slika je krug u sredini, oko nje prazan prostor */
 .wpick-card{overflow:hidden;padding:0}
-.wpick-card .wpick-avatar{width:100%;aspect-ratio:5/4;display:grid;place-items:center;
+.wpick-card .wpick-avatar{position:relative;width:100%;aspect-ratio:5/4;display:grid;place-items:center;
   background:var(--ink2);border-radius:17px 17px 0 0;overflow:hidden}
-.wpick-card .wpick-avatar > img.wpick-photo{height:74%;width:auto;aspect-ratio:1/1;border-radius:50%;
-  object-fit:cover;display:block;border:3px solid rgba(255,255,255,.16);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.wpick-card .wpick-avatar > img.wpick-photo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  height:74%;width:auto;aspect-ratio:1/1;max-width:none;border-radius:50%;object-fit:cover;display:block;
+  border:3px solid rgba(255,255,255,.16);box-shadow:0 8px 22px rgba(0,0,0,.35)}
 
 /* Mala slika radnika u zaglavlju cenovnika */
 .wthumb-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--ink2)}
