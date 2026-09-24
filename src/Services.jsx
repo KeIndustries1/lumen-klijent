@@ -6,12 +6,21 @@ import { SkeletonWorkerGrid, SkeletonRows } from './Skeleton'
 import { haptic } from './lib/haptic'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { createPortal } from 'react-dom'
+import { sname, rname } from './lib/sname'
 
 const din = v => v.toLocaleString('sr-RS') + ' din'
 const dur = m => m>=60 ? (m%60 ? Math.floor(m/60)+'h '+(m%60)+'min' : Math.floor(m/60)+'h') : m+'min'
 
+// 1 usluga · 2-4 usluge · 5+ usluga (i 11-14 usluga)
+const uslugaWord = n => {
+  const d = n % 10, h = n % 100
+  if (d === 1 && h !== 11) return 'usluga'
+  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'usluge'
+  return 'usluga'
+}
+
 export default function Services({ salon, openWorkerId, onBookWith, onActiveChange }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [workers, setWorkers] = useState(null)
   const [active, setActive] = useState(null)
   useEffect(() => { onActiveChange?.(!!active) }, [active])
@@ -67,7 +76,7 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
                       {w.name ? (
                         <>
                           <span className="name">{w.name}</span>
-                          <span className="person-role">{w.role_sr}</span>
+                          <span className="person-role">{rname(w, lang)}</span>
                         </>
                       ) : (
                         <>
@@ -88,6 +97,8 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
 }
 
 function PriceList({ worker, onBack, onBookWith }) {
+  const { lang } = useLang()
+  const L = (sr, en) => lang === 'en' ? en : sr
   const [services, setServices] = useState(null)
   const [multi, setMulti] = useState(false)
   const [chosen, setChosen] = useState([])
@@ -102,6 +113,7 @@ function PriceList({ worker, onBack, onBookWith }) {
   function toggleMulti() { setMulti(m => !m); setChosen([]) }
 
   const total = services ? chosen.reduce((a,id) => a + services.find(s=>s.id===id).price_rsd, 0) : 0
+  const countLabel = n => lang === 'en' ? (n === 1 ? 'service' : 'services') : uslugaWord(n)
 
   return (
     <motion.div
@@ -109,9 +121,9 @@ function PriceList({ worker, onBack, onBookWith }) {
       transition={{ duration: 0.18 }}
       style={{ padding: 16, paddingBottom: chosen.length ? 90 : 16 }}
     >
-      <button className="backbtn" onClick={onBack}>‹ Nazad</button>
+      <button className="backbtn" onClick={onBack}>‹ {L('Nazad', 'Back')}</button>
 
-      <div className="pagehead" style={{ marginBottom: 14 }}><h2>Usluge i cene</h2></div>
+      <div className="pagehead" style={{ marginBottom: 14 }}><h2>{L('Usluge i cene', 'Services & prices')}</h2></div>
 
       <div className="card row" style={{ marginBottom: 14 }}>
         {worker.name ? (
@@ -123,7 +135,7 @@ function PriceList({ worker, onBack, onBookWith }) {
             </motion.div>
             <span className="grow">
               <span className="name">{worker.name}</span><br/>
-              <span className="tiny">{worker.role_sr}</span>
+              <span className="tiny">{rname(worker, lang)}</span>
             </span>
           </>
         ) : (
@@ -137,7 +149,7 @@ function PriceList({ worker, onBack, onBookWith }) {
           </>
         )}
         <button className={'multitoggle' + (multi ? ' on' : '')} onClick={toggleMulti}>
-          {multi ? 'Poništi' : 'Izaberi više'}
+          {multi ? L('Poništi', 'Cancel') : L('Izaberi više', 'Select several')}
         </button>
       </div>
 
@@ -164,14 +176,14 @@ function PriceList({ worker, onBack, onBookWith }) {
                   {s.image_url ? <img src={s.image_url} alt="" className="svcicon-photo" /> : c.icon}
                 </div>
                 <span className="grow svc-text">
-                  <span className="name">{s.name_sr}</span>
+                  <span className="name">{sname(s, lang)}</span>
                   <span className="svc-meta">{dur(s.duration_min)}</span>
                   <span className="svc-price">{din(s.price_rsd)}</span>
                 </span>
                 {multi ? (
                   <button className={'chk-round' + (sel ? ' sel' : '')} onClick={() => toggle(s.id)}>{sel ? '✓' : ''}</button>
                 ) : (
-                  <button className="svcrow-btn" onClick={() => onBookWith(worker, [s.id])}>Rezerviši</button>
+                  <button className="svcrow-btn" onClick={() => onBookWith(worker, [s.id])}>{L('Rezerviši', 'Book')}</button>
                 )}
               </div>
             )
@@ -181,10 +193,10 @@ function PriceList({ worker, onBack, onBookWith }) {
 
       {multi && chosen.length > 0 && createPortal((
         <div className="selectbar">
-          <span>{chosen.length} {chosen.length===1?'usluga':'usluge'}</span>
+          <span>{chosen.length} {countLabel(chosen.length)}</span>
           <b className="grow" style={{textAlign:'right', marginRight:12}}>{din(total)}</b>
           <button className="btn" style={{width:'auto', padding:'12px 20px'}} onClick={() => onBookWith(worker, chosen)}>
-            Nastavi
+            {L('Nastavi', 'Continue')}
           </button>
         </div>
       ), document.body)}

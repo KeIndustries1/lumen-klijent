@@ -1,0 +1,1 @@
+export const sname = (s, lang) => (lang === 'en' && s.name_en) || s.name_sr
