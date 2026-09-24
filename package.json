@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "android": "vite build && npx cap sync android"
+    "android": "vite build && npx cap sync android",
+    "sacuvaj": "git add . && git commit -m \"update\" && git push",
+    "sve": "npm run android && npm run sacuvaj"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -17,6 +19,7 @@
     "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@capacitor/ios": "^8.5.2",
+    "@capacitor/push-notifications": "^8.1.2",
     "@supabase/supabase-js": "^2.112.3",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.47.0",
@@ -28,6 +31,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
+    "typescript": "^7.0.2",
     "vite": "^8.2.0"
   }
 }

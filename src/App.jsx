@@ -13,6 +13,8 @@ import { createPortal } from 'react-dom'
 import { LangProvider, useLang } from './lib/i18n'
 import { applyTheme } from './lib/themes'
 import { haptic } from './lib/haptic'
+import { initPush } from './lib/push'
+import { AtSign, Phone, MapPin, User, Info, Shield, FileText, Trash2, LogOut } from 'lucide-react'
 import './app.css'
 
 // Svaki salon = svoja Vercel instanca istog koda. Slug se čita iz env
@@ -50,6 +52,9 @@ export default function App() {
       .then(({ data }) => setClient(data))
   }, [session])
 
+  // Push: traži dozvolu tek kad je klijent ulogovan i završio profil
+  useEffect(() => { if (client?.phone) initPush('klijent') }, [client?.id])
+
   if (session === undefined || !salon) return <Loading />
   if (!session) return <AuthScreen salon={salon} />
   if (!entered) return <Home salon={salon} standalone onBook={() => setEntered(true)} />
@@ -69,15 +74,6 @@ export default function App() {
 
   return <LangProvider><MainApp client={client} salon={salon} /></LangProvider>
 }
-
-// ============================================================
-// Ulazni ekran — prikazuje se SVAKI put kad se aplikacija otvori,
-// bez obzira da li je sesija već sačuvana. Klik na Login/Uđi
-// prebacuje dalje (na formu za login ako nema sesije, ili pravo
-// u aplikaciju ako je korisnik već ulogovan).
-// ============================================================
-import { AtSign, Phone, MapPin, User, Info, Shield, FileText, Trash2, LogOut } from 'lucide-react'
-
 
 function Loading() {
   return <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}><GearLoader /></div>
