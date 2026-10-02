@@ -72,7 +72,7 @@ export default function App() {
     )
   }
 
-  return <LangProvider><MainApp client={client} salon={salon} /></LangProvider>
+  return <LangProvider overrides={salon.texts}><MainApp client={client} salon={salon} /></LangProvider>
 }
 
 function Loading() {

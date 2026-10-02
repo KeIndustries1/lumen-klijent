@@ -126,4 +126,14 @@ export function applyTheme(themeKey, brandColorOverride) {
   Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v))
   // Salon može da pregazi SAMO akcentnu boju ako želi svoju tačnu nijansu
   if (brandColorOverride) root.style.setProperty('--rouge', brandColorOverride)
+  // Tekst na dugmadima u boji salona: beo, ili taman ako je boja svetla (npr. Graphite)
+  const acc = brandColorOverride || theme.vars['--rouge']
+  root.style.setProperty('--on-rouge', isLight(acc) ? theme.vars['--ink'] : '#fff')
+}
+
+function isLight(hex) {
+  const h = String(hex || '').replace('#', '')
+  if (h.length !== 6) return false
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.45
 }

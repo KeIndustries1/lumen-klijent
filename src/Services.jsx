@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
-import { CATEGORY, catFor, initials } from './images'
+import { catFor, tileFor, initials } from './images'
 import { useLang } from './lib/i18n'
 import { SkeletonWorkerGrid, SkeletonRows } from './Skeleton'
 import { haptic } from './lib/haptic'
@@ -47,7 +47,7 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
     <LayoutGroup>
       <AnimatePresence mode="popLayout">
         {active ? (
-          <PriceList key="pricelist" worker={active} onBack={() => setActive(null)} onBookWith={onBookWith} />
+          <PriceList salon={salon} key="pricelist" worker={active} onBack={() => setActive(null)} onBookWith={onBookWith} />
         ) : (
           <motion.div key="grid"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -57,7 +57,7 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
             <div className="pagehead"><h2>{t('servicesTitle')}</h2><p>{t('servicesSub')}</p></div>
             <div className="wpick-grid">
               {workers.map(w => {
-                const c = catFor(w.role_sr)
+                const c = catFor(w)
                 return (
                   <button key={w.id} className="wpick-card person"
                     onClick={() => { haptic('tap'); setActive(w) }}>
@@ -96,13 +96,13 @@ export default function Services({ salon, openWorkerId, onBookWith, onActiveChan
   )
 }
 
-function PriceList({ worker, onBack, onBookWith }) {
+function PriceList({ salon, worker, onBack, onBookWith }) {
   const { lang } = useLang()
   const L = (sr, en) => lang === 'en' ? en : sr
   const [services, setServices] = useState(null)
   const [multi, setMulti] = useState(false)
   const [chosen, setChosen] = useState([])
-  const c = catFor(worker.role_sr)
+  const c = catFor(worker)
 
   useEffect(() => {
     supabase.from('services').select('*').eq('worker_id', worker.id).eq('active', true).eq('is_vip', false).order('sort')
@@ -172,9 +172,15 @@ function PriceList({ worker, onBack, onBookWith }) {
             const sel = chosen.includes(s.id)
             return (
               <div key={s.id} className={'svcrow' + (sel ? ' sel' : '')}>
-                <div className="svcicon" style={s.image_url ? undefined : { background: `linear-gradient(150deg, ${c.from}, ${c.to})` }}>
-                  {s.image_url ? <img src={s.image_url} alt="" className="svcicon-photo" /> : c.icon}
-                </div>
+                {(() => {
+                  const tile = tileFor(salon, c, sname(s, lang))
+                  return (
+                    <div className="svcicon" style={s.image_url ? undefined : { background: tile.background }}>
+                      {s.image_url ? <img src={s.image_url} alt="" className="svcicon-photo" />
+                        : tile.letter ? <span className="svc-mono">{tile.letter}</span> : <c.Icon size={30} strokeWidth={1.6} />}
+                    </div>
+                  )
+                })()}
                 <span className="grow svc-text">
                   <span className="name">{sname(s, lang)}</span>
                   <span className="svc-meta">{dur(s.duration_min)}</span>

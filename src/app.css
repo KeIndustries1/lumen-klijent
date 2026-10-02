@@ -377,3 +377,10 @@ html.no-scroll, html.no-scroll body{overflow:hidden;overscroll-behavior:none;hei
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .person-body .name{font-size:14.5px;font-weight:600;color:var(--text);line-height:1.25}
 .person-role{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--rouge)}
+
+/* Kreator: pločica usluge sa slovom i radno vreme po danima */
+.svc-mono{font-family:Fraunces,serif;font-weight:600;font-size:32px;color:#fff;line-height:1}
+.svcicon svg{color:#fff}
+.hours-lines{display:flex;flex-direction:column;gap:2px}
+/* Kontrast: tekst na pozadini u boji salona (beo ili taman, vidi applyTheme) */
+.hero .cta, .gate-hero .cta, .btn, .svcpick.sel .chk, .cell.on, .slot.on, .svcrow-btn, .chk-round.sel, .lang button.on, .subtabs button.on { color: var(--on-rouge, #fff) }

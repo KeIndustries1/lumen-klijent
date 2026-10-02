@@ -65,10 +65,11 @@ const T = {
 
 const LangCtx = createContext(null)
 
-export function LangProvider({ children }) {
+// overrides = salons.texts, npr. { sr: { servicesTitle: 'Izaberi berberina' }, en: {...} }
+export function LangProvider({ children, overrides }) {
   const [lang, setLang] = useState(localStorage.getItem('lumen_lang') || 'sr')
   function change(l) { setLang(l); localStorage.setItem('lumen_lang', l) }
-  return <LangCtx.Provider value={{ lang, setLang: change, t: k => T[lang][k] ?? k }}>{children}</LangCtx.Provider>
+  return <LangCtx.Provider value={{ lang, setLang: change, t: k => overrides?.[lang]?.[k] ?? T[lang][k] ?? k }}>{children}</LangCtx.Provider>
 }
 
 export function useLang() { return useContext(LangCtx) }

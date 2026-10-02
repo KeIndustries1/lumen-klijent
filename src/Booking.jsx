@@ -101,7 +101,7 @@ export default function Booking({ salon, client, worker, serviceIds, onDone, onB
       <button className="ghost" style={{ marginBottom: 12 }} onClick={step===1 ? onBack : () => setStep(1)}>← {L('Nazad', 'Back')}</button>
 
       <div className="card row" style={{ marginBottom: 14 }}>
-        <div className="wthumb-avatar" style={{ background: `linear-gradient(150deg, ${catFor(worker.role_sr).from}, ${catFor(worker.role_sr).to})` }}>
+        <div className="wthumb-avatar" style={{ background: `linear-gradient(150deg, ${catFor(worker).from}, ${catFor(worker).to})` }}>
           {initials(worker.name)}
         </div>
         <span className="grow">
