@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { haptic } from './lib/haptic'
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
+import { nativeSignIn } from './lib/nativeAuth'
 
 // ============================================================
 // Ekran za prijavu / registraciju. Prvi ekran koji NOVI korisnik
@@ -40,6 +41,15 @@ export default function AuthScreen({ salon }) {
   async function oauth(provider) {
     haptic('tap'); setErr(null); setOauthBusy(provider)
     const native = Capacitor.isNativePlatform()
+    if (Capacitor.getPlatform() === 'ios') {
+      try { await nativeSignIn(provider) }
+      catch (e) {
+        const msg = e?.message || String(e)
+        if (!/cancel/i.test(msg)) { setErr(poruka({ message: msg })); haptic('warning') }
+      }
+      setOauthBusy(null)
+      return
+    }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {

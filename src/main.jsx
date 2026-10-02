@@ -1,3 +1,4 @@
+import { Browser } from '@capacitor/browser'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App as CapacitorApp } from '@capacitor/app'
@@ -8,6 +9,7 @@ import App from './App.jsx'
 // (umesto kroz obican brauzer), Capacitor javlja to preko ovog
 // dogadjaja. Izvucemo token iz adrese i rucno ulogujemo korisnika.
 CapacitorApp.addListener('appUrlOpen', async ({ url }) => {
+  await Browser.close().catch(() => {});
   if (url.includes('access_token')) {
     const hashPart = url.split('#')[1]
     if (!hashPart) return
