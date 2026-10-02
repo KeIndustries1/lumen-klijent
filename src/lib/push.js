@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { PushNotifications } from '@capacitor/push-notifications'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import { supabase } from './supabase'
 
 // app: 'klijent' ili 'workin'
@@ -21,6 +22,23 @@ export async function initPush(app) {
   })
 
   PushNotifications.addListener('registrationError', e => console.error('Push greška:', e))
+
+  // Android ne prikazuje notifikaciju dok je aplikacija otvorena (iOS to radi sam,
+  // preko presentationOptions). Zato je ovde prikazujemo kao lokalnu notifikaciju.
+  if (Capacitor.getPlatform() === 'android') {
+    try { await LocalNotifications.requestPermissions() } catch (e) { /* ignorisi */ }
+    PushNotifications.addListener('pushNotificationReceived', async (n) => {
+      try {
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: Math.floor(Date.now() % 2147483647),
+            title: n.title || '',
+            body: n.body || '',
+          }],
+        })
+      } catch (e) { console.error('Lokalna notifikacija greška:', e) }
+    })
+  }
 
   await PushNotifications.register()
 }
