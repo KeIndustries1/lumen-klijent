@@ -7,6 +7,7 @@ import Services from './Services'
 import Booking from './Booking'
 import Appointments from './Appointments'
 import Notifications from './Notifications'
+import ShopMain from './shop/ShopMain'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GearLoader } from './Skeleton'
 import { createPortal } from 'react-dom'
@@ -72,7 +73,14 @@ export default function App() {
     )
   }
 
-  return <LangProvider overrides={salon.texts}><MainApp client={client} salon={salon} /></LangProvider>
+  // Šablon "Katalog i porudžbine" (cvećare, torte, pokloni) ili zakazivanje termina
+  return (
+    <LangProvider overrides={salon.texts}>
+      {salon.kind === 'catalog'
+        ? <ShopMain salon={salon} client={client} LangSwitch={LangSwitch} Settings={Settings} />
+        : <MainApp client={client} salon={salon} />}
+    </LangProvider>
+  )
 }
 
 function Loading() {
