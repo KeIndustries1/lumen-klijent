@@ -8,6 +8,7 @@ import Booking from './Booking'
 import Appointments from './Appointments'
 import Notifications from './Notifications'
 import ShopMain from './shop/ShopMain'
+import { heroArt } from './shop/HeroArt'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GearLoader } from './Skeleton'
 import { createPortal } from 'react-dom'
@@ -58,7 +59,7 @@ export default function App() {
 
   if (session === undefined || !salon) return <Loading />
   if (!session) return <AuthScreen salon={salon} />
-  if (!entered) return <Home salon={salon} standalone onBook={() => setEntered(true)} />
+  if (!entered) return <Home salon={salon} standalone art={heroArt(salon)} onBook={() => setEntered(true)} />
   if (client === undefined) return <Loading />
   if (!client || !client.phone) {
     return (

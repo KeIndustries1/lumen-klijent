@@ -71,3 +71,9 @@
 .inspo input{position:absolute;inset:0;opacity:0}
 .inspo img{width:56px;height:56px;border-radius:10px;object-fit:cover}
 .err-text{color:#e88a9c;font-size:13px;margin:8px 0}
+
+/* Nacrtan buket na početnom ekranu */
+.gate-hero.has-art > *:not(.gate-art){position:relative}
+.gate-art{position:absolute;left:50%;top:max(8px, env(safe-area-inset-top));width:300px;height:300px;transform:translateX(-50%);pointer-events:none}
+.gate-art i{position:absolute;left:-60px;right:-60px;bottom:-2px;height:120px;background:linear-gradient(180deg,transparent,var(--ink))}
+.gate-hero.has-art{min-height:max(470px, 55dvh)}

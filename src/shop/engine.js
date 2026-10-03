@@ -14,6 +14,12 @@ export const sid = p => `${p || 'x'}${Date.now().toString(36)}${(seq++).toString
 const C = (id, name, nameEn, hex) => ({ id, name, nameEn, hex, on: true })
 
 export function defaultShop(preset = 'cvecara') {
+  const shop = baseShop(preset)
+  shop.hero = { on: true, preset: 'h-oblak', design: heroBouquets(shop)[0].design }
+  return shop
+}
+
+function baseShop(preset) {
   const colors = [
     C('crvena', 'Crvena', 'Red', '#C62839'), C('bordo', 'Bordo', 'Burgundy', '#7A1630'), C('roze', 'Roze', 'Pink', '#EE8FB0'),
     C('puder', 'Puder', 'Blush', '#F5C9D3'), C('bela', 'Bela', 'White', '#F7F3EC'), C('krem', 'Krem', 'Cream', '#EEDCB8'),
@@ -129,6 +135,56 @@ export function newDesign(shop) {
     extras: {}, custom: {}, wish: '', inspo: null, card: '',
   }
 }
+// Galerija gotovih crteža: za početni ekran i kao slika proizvoda kad nema fotografije.
+// Uzimaju cveće/boje po id-u, a ako ih prodavnica nema, prve uključene.
+function maker(shop) {
+  const L = k => onList(shop[k])
+  const pick = (k, id, i = 0) => (byId(L(k), id) || L(k)[i % Math.max(1, L(k).length)])?.id
+  const packBy = kind => (L('packs').find(p => p.kind === kind) || L('packs')[0])
+  const ex = (...draws) => Object.fromEntries(draws.map(dr => onList(shop.extras).find(e => e.draw === dr && e.input === 'none')).filter(Boolean).map(e => [e.id, true]))
+  const D = (kind, paper, items, extras) => {
+    const pk = packBy(kind)
+    const pc = packColors(shop, pk)
+    return { pack: pk?.id, packColor: (byId(pc, paper) || pc[0])?.id, items: items.map(([f, fi, n, c, ci]) => ({ flower: pick('flowers', f, fi), count: n, color: pick('colors', c, ci) })), extras, custom: {}, wish: '', inspo: null, card: '' }
+  }
+  return { D, ex }
+}
+
+// 5 velikih buketa za početni ekran (umesto fotografije)
+export function heroBouquets(shop) {
+  const { D, ex } = maker(shop)
+  return [
+    { id: 'h-oblak', name: 'Roze oblak', design: D('wrap', 'crni', [['ruza', 0, 18, 'roze', 2], ['ruza', 0, 14, 'puder', 3], ['ruza', 0, 12, 'bela', 4]], ex('glitter', 'bow')) },
+    { id: 'h-crveni', name: '51 crvena ruža', design: D('wrap', 'crni', [['ruza', 0, 51, 'crvena', 0]], ex('bow')) },
+    { id: 'h-plavi', name: 'Plavo-beli', design: D('wrap', 'beli', [['ruza', 0, 24, 'plava', 7], ['ruza', 0, 16, 'bela', 4]], ex('butterflies', 'glitter')) },
+    { id: 'h-srce', name: 'Veliko srce', design: D('box-heart', 'crna', [['ruza', 0, 30, 'crvena', 0], ['ruza', 0, 8, 'bordo', 1]], ex('crown')) },
+    { id: 'h-basta', name: 'Prolećna bašta', design: D('wrap', 'kraft', [['bozur', 2, 10, 'roze', 2], ['lala', 1, 12, 'zuta', 9], ['gerber', 3, 10, 'lila', 6], ['ruza', 0, 8, 'bela', 4]], ex('bow', 'butterflies')) },
+  ]
+}
+
+// 15 buketa za proizvode u katalogu (kad nema fotografije)
+export function bouquetGallery(shop) {
+  const { D, ex } = maker(shop)
+  return [
+    { id: 'oblak', name: 'Roze oblak', design: D('wrap', 'crni', [['ruza', 0, 10, 'roze', 2], ['ruza', 0, 8, 'puder', 3], ['ruza', 0, 7, 'bela', 4]], ex('glitter')) },
+    { id: 'klasik', name: 'Crveni klasik', design: D('wrap', 'crni', [['ruza', 0, 21, 'crvena', 0]], ex('bow')) },
+    { id: 'plavi', name: 'Plavi san', design: D('wrap', 'beli', [['ruza', 0, 14, 'plava', 7], ['ruza', 0, 7, 'bela', 4]], ex('butterflies')) },
+    { id: 'srce', name: 'Srce u kutiji', design: D('box-heart', 'crna', [['ruza', 0, 15, 'crvena', 0]], ex('crown')) },
+    { id: 'prolece', name: 'Prolećni miks', design: D('wrap', 'kraft', [['lala', 1, 7, 'zuta', 9], ['bozur', 2, 5, 'roze', 2], ['gerber', 3, 5, 'lila', 6]], ex('bow')) },
+    { id: 'bordo', name: 'Bordo noć', design: D('wrap', 'crni', [['ruza', 0, 25, 'bordo', 1], ['ruza', 0, 6, 'crna', 8]], ex('glitter')) },
+    { id: 'bela', name: 'Bela elegancija', design: D('wrap', 'crni', [['ruza', 0, 19, 'bela', 4]], ex('bow')) },
+    { id: 'bozur', name: 'Božuri', design: D('wrap', 'roze', [['bozur', 2, 9, 'roze', 2], ['bozur', 2, 4, 'puder', 3]], ex('bow')) },
+    { id: 'lavanda', name: 'Lavanda', design: D('wrap', 'krem', [['ruza', 0, 15, 'lila', 6], ['lala', 1, 6, 'bela', 4]], ex('butterflies')) },
+    { id: 'sunce', name: 'Sunce', design: D('wrap', 'kraft', [['gerber', 3, 11, 'zuta', 9], ['lala', 1, 6, 'krem', 5]], ex('bow')) },
+    { id: 'kutija-bela', name: 'Bela kutija', design: D('box-round', 'bela', [['ruza', 0, 12, 'puder', 3], ['ruza', 0, 7, 'roze', 2]], {}) },
+    { id: 'kutija-crna', name: 'Crna kutija', design: D('box-round', 'crna', [['ruza', 0, 9, 'crvena', 0], ['ruza', 0, 8, 'bela', 4]], ex('crown')) },
+    { id: 'srce-roze', name: 'Roze srce', design: D('box-heart', 'roze', [['ruza', 0, 10, 'bela', 4], ['ruza', 0, 5, 'puder', 3]], ex('glitter')) },
+    { id: 'meda', name: 'Meda i ruže', design: D('wrap', 'roze', [['ruza', 0, 11, 'crvena', 0]], ex('toy', 'bow')) },
+    { id: 'duga', name: 'Duga', design: D('wrap', 'providni', [['lala', 1, 4, 'crvena', 0], ['lala', 1, 4, 'zuta', 9], ['lala', 1, 4, 'plava', 7], ['lala', 1, 4, 'lila', 6], ['lala', 1, 4, 'roze', 2]], ex('bow')) },
+  ]
+}
+export const heroPresets = heroBouquets
+
 export const cloneDesign = d => JSON.parse(JSON.stringify(d || {}))
 
 // Koraci koji se prikazuju (uključeni + uslov "prikaži samo za pakovanja")

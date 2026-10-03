@@ -28,14 +28,15 @@ function hoursLines(hours) {
 // Gore: slika/gradijent, naziv salona, dugme Rezervisi.
 // Ispod: Info kockice (IG, telefon, lokacija) + opis salona.
 // ============================================================
-export default function Home({ salon, onBook, label = 'Rezerviši', standalone = false }) {
+export default function Home({ salon, onBook, label = 'Rezerviši', standalone = false, art = null }) {
   const igHandle = salon.instagram?.replace('@', '')
   // natpis iznad imena: null = 'SALON' (kao ranije), '' = bez natpisa
   const eyebrow = salon.label == null ? 'SALON' : salon.label
   return (
     <div className={standalone ? 'gate' : 'home-page'}>
-      <div className={'gate-hero' + (salon.hero_image_url ? ' has-photo' : '')}
-        style={salon.hero_image_url ? { '--gate-photo': `url(${salon.hero_image_url})` } : undefined}>
+      <div className={'gate-hero' + (art ? ' has-art' : salon.hero_image_url ? ' has-photo' : '')}
+        style={!art && salon.hero_image_url ? { '--gate-photo': `url(${salon.hero_image_url})` } : undefined}>
+        {art}
         {eyebrow && <div className="gate-eyebrow">{eyebrow}</div>}
         <div className="gate-name">{spaced(salon.name)}</div>
         <div className="gate-rule" />

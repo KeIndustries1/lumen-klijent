@@ -11,6 +11,7 @@ import Product from './Product'
 import Checkout from './Checkout'
 import Orders, { Done } from './Orders'
 import Bouquet from './Bouquet'
+import { heroArt } from './HeroArt'
 import { byId, matchingDesign, productPrice, nm, designPrice, defaultShop } from './engine'
 import './shop.css'
 
@@ -69,7 +70,7 @@ export default function ShopMain({ salon, client, LangSwitch, Settings }) {
       {body || (
         <div className="tabpage-stack">
           <div style={{ display: page === 'home' ? 'block' : 'none' }}>
-            <Home salon={salon} label={shop.texts?.cta || L('Naruči', 'Order')} onBook={() => goTab('catalog')} />
+            <Home salon={salon} art={heroArt(salon)} label={shop.texts?.cta || L('Naruči', 'Order')} onBook={() => goTab('catalog')} />
             {(shop.order?.rules || []).filter(Boolean).length > 0 && (
               <div className="homedark" style={{ paddingTop: 0 }}>
                 <div className="eyebrow">{L('Pravila naručivanja', 'Ordering rules')}</div>
