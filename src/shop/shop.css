@@ -113,7 +113,8 @@
 /* Pravila i uslovi */
 .rules-btn{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--ink2);color:var(--text);font-weight:600;font-size:14.5px}
 .rules-btn span:last-child{color:var(--rouge);font-size:20px}
-.rules-modal{touch-action:pan-y}
+.settings-modal.rules-modal{touch-action:pan-y;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;max-height:88vh;max-height:88dvh;padding-bottom:calc(36px + env(safe-area-inset-bottom))}
+.settings-modal.rules-modal .sheet-header{position:sticky;top:-8px;background:var(--card);padding:8px 0 10px;margin:0 0 6px;z-index:1}
 .rules-text{padding-bottom:10px}
 .rules-h{margin:18px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--rouge);font-weight:700}
 .rules-h:first-child{margin-top:0}
