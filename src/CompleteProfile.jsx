@@ -8,8 +8,9 @@ import { haptic } from './lib/haptic'
 // još nema red (ili red postoji ali nema broj telefona).
 // Kad se sačuva, App.jsx ponovo učita klijenta i ovaj ekran nestaje.
 // ============================================================
-export default function CompleteProfile({ salonId, userId, email, onDone }) {
+export default function CompleteProfile({ salonId, userId, email, onDone, catalog = false }) {
   const [name, setName] = useState('')
+  const [last, setLast] = useState('')
   const [phone, setPhone] = useState('')
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -18,7 +19,9 @@ export default function CompleteProfile({ salonId, userId, email, onDone }) {
     e.preventDefault()
     setErr(null); setBusy(true)
     const { error } = await supabase.from('clients').upsert(
-      { auth_user_id: userId, salon_id: salonId, name, phone, email },
+      catalog
+        ? { auth_user_id: userId, salon_id: salonId, name: `${name.trim()} ${last.trim()}`.trim(), email }
+        : { auth_user_id: userId, salon_id: salonId, name, phone, email },
       { onConflict: 'auth_user_id' }
     )
     setBusy(false)
@@ -34,12 +37,21 @@ export default function CompleteProfile({ salonId, userId, email, onDone }) {
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
         <h1 style={{ fontSize: 30, marginBottom: 6 }}>Još jedan korak</h1>
-        <p className="tiny" style={{ marginBottom: 20 }}>Ime i broj telefona su nam potrebni da salon zna ko dolazi na termin.</p>
+        <p className="tiny" style={{ marginBottom: 20 }}>{catalog ? 'Kako se zoveš? Telefon i adresu upisuješ tek kad naručuješ.' : 'Ime i broj telefona su nam potrebni da salon zna ko dolazi na termin.'}</p>
         <form onSubmit={submit} className="stack">
-          <input className="f" placeholder="Ime i prezime" value={name}
-                 onChange={e => setName(e.target.value)} required />
-          <input className="f" type="tel" placeholder="Broj telefona (npr. 064 123 4567)" value={phone}
-                 onChange={e => setPhone(e.target.value)} required />
+          {catalog ? (
+            <>
+              <input className="f" placeholder="Ime" value={name} autoComplete="given-name" onChange={e => setName(e.target.value)} required />
+              <input className="f" placeholder="Prezime" value={last} autoComplete="family-name" onChange={e => setLast(e.target.value)} required />
+            </>
+          ) : (
+            <>
+              <input className="f" placeholder="Ime i prezime" value={name}
+                     onChange={e => setName(e.target.value)} required />
+              <input className="f" type="tel" placeholder="Broj telefona (npr. 064 123 4567)" value={phone}
+                     onChange={e => setPhone(e.target.value)} required />
+            </>
+          )}
           {err && <p className="err">{err}</p>}
           <button className="btn" disabled={busy}>{busy ? 'Sačekajte…' : 'Nastavi'}</button>
         </form>

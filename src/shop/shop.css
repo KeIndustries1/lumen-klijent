@@ -77,3 +77,35 @@
 .gate-art{position:absolute;left:50%;top:max(8px, env(safe-area-inset-top));width:300px;height:300px;transform:translateX(-50%);pointer-events:none}
 .gate-art i{position:absolute;left:-60px;right:-60px;bottom:-2px;height:120px;background:linear-gradient(180deg,transparent,var(--ink))}
 .gate-hero.has-art{min-height:max(470px, 55dvh)}
+
+/* Cveće po redovima (boja + broj, isti cvet u više boja) */
+.frow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px 12px;margin-bottom:8px}
+.frow-head{display:flex;align-items:center;gap:8px;min-height:36px}
+.frow-head .swlabel{flex:1}
+.qty.mini{background:none;border:0;padding:0;margin:0;gap:6px}
+.qty.mini button{width:36px;height:36px;font-size:18px}
+.qty.mini span{min-width:30px;font-size:18px}
+.frow-x{width:36px;height:36px;border-radius:10px;color:var(--muted);font-size:14px}
+.frow-add{display:block;margin-top:6px;padding:8px 0;color:var(--rouge);font-weight:600;font-size:13.5px;min-height:36px}
+
+/* Galerija slika proizvoda */
+.gal{margin-bottom:16px}
+.gal-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;scrollbar-width:none;border-radius:16px}
+.gal-track::-webkit-scrollbar{display:none}
+.gal-slide{flex:0 0 100%;scroll-snap-align:center;margin:0}
+.gal-dots{display:flex;justify-content:center;gap:4px;margin-top:4px}
+.gal-dots button{width:24px;height:24px;display:grid;place-items:center;position:relative}
+.gal-dots button:after{content:'';width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s,width .2s}
+.gal-dots button.on:after{background:var(--rouge);width:18px;border-radius:4px}
+
+/* Vreme ličnog preuzimanja */
+.times{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+.times button{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;font-size:14.5px}
+.times button.sel{border-color:var(--rouge);background:var(--rouge-s)}
+
+/* Izbor na gotovom proizvodu (npr. Partizan / Zvezda) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px}
+.chip.sel{border-color:var(--rouge);background:var(--rouge-s)}
+.times.parts{grid-template-columns:1fr}
+.times.parts button{text-align:left;padding:0 16px}

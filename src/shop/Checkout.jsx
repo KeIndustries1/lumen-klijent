@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import Bouquet from './Bouquet'
-import { din, orderDates, iso, deposit, lines, summary } from './engine'
+import { din, orderDates, iso, deposit, lines, summary, pickupChoices, pickupMode, leadFor, totalCount } from './engine'
 import { haptic } from '../lib/haptic'
 
 const DAYS = { sr: ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'], en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] }
@@ -14,16 +14,28 @@ async function uploadDataUrl(path, dataUrl) {
   return supabase.storage.from('order-photos').getPublicUrl(path).data.publicUrl
 }
 
-export default function Checkout({ shop, salon, client, lang, cart, setCart, onAddMore, onBack, onDone }) {
+export default function Checkout({ shop, salon, client, lang, cart, setCart, onAddMore, onBack, onDone, onClient }) {
   const L = (sr, en) => (lang === 'en' ? en : sr)
   const o = shop.order || {}
   const methods = [o.pickup?.on && 'pickup', o.delivery?.on && 'delivery'].filter(Boolean)
   const [fulfil, setFulfil] = useState(methods[0] || 'pickup')
-  const dates = orderDates(shop, 14)
+  // najveći buket u korpi određuje najraniji rok (npr. preko 50 cvetova → 10 dana)
+  const biggest = Math.max(0, ...cart.filter(it => !it.keychain).map(it => totalCount(it.design)))
+  const lead = leadFor(shop, biggest)
+  const allDates = orderDates(shop, 28, new Date(), biggest)
+  const mode = fulfil === 'pickup' ? pickupMode(shop) : 'none'
+  const timeOn = mode !== 'none'
+  // termini iz radnog vremena: samo dani kad radi
+  const dates = (mode === 'hours' ? allDates.filter(d => pickupChoices(shop, salon.hours, d).length) : allDates).slice(0, 14)
   const [full, setFull] = useState(new Set())
   const [di, setDi] = useState(0)
+  const [tm, setTm] = useState('')
+  const slots = timeOn && dates[di] ? pickupChoices(shop, salon.hours, dates[di]) : []
   const parts = String(client.name || '').trim().split(/\s+/)
-  const [f, setF] = useState({ first: parts[0] || '', last: parts.slice(1).join(' '), phone: client.phone || '', email: client.email || '', address: '', city: '', zip: '' })
+  const ship = client.ship || {}
+  const [f, setF] = useState({ first: parts[0] || '', last: parts.slice(1).join(' '), phone: client.phone || '', email: client.email || '', address: ship.address || '', city: ship.city || '', zip: ship.zip || '' })
+  useEffect(() => { setDi(0) }, [fulfil])
+  useEffect(() => { if (tm && !slots.includes(tm)) setTm('') }, [di, fulfil])
   const [card, setCard] = useState('')
   const [agree, setAgree] = useState(!(o.rules || []).filter(Boolean).length)
   const [busy, setBusy] = useState(false)
@@ -47,7 +59,7 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
   const dep = deposit(shop, total)
   const need = ['first', 'last', 'phone', 'email', ...(fulfil === 'delivery' ? ['address', 'city', 'zip'] : [])]
   const missing = need.filter(k => !String(f[k] || '').trim() || (k === 'email' && !/@/.test(f.email)))
-  const ok = cart.length > 0 && !missing.length && agree && dates[di] && !full.has(iso(dates[di]))
+  const ok = cart.length > 0 && !missing.length && agree && dates[di] && !full.has(iso(dates[di])) && (!timeOn || !slots.length || !!tm)
   const inp = (k, label, props = {}) => (
     <label className="field"><span>{label}</span>
       <input className={'fin' + (tried && missing.includes(k) ? ' bad' : '')} value={f[k]} onChange={e => setF({ ...f, [k]: e.target.value })} {...props} />
@@ -56,7 +68,7 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
 
   async function send() {
     setTried(true)
-    if (!ok) { haptic('warning'); setErr(L('Popuni sva polja i potvrdi pravila.', 'Fill in every field and accept the rules.')); return }
+    if (!ok) { haptic('warning'); setErr(timeOn && !tm && slots.length ? L('Izaberi vreme preuzimanja.', 'Choose a pickup time.') : L('Popuni sva polja i potvrdi pravila.', 'Fill in every field and accept the rules.')); return }
     setBusy(true); setErr('')
     try {
       const items = []
@@ -69,11 +81,17 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
         ...(fulfil === 'delivery' ? { address: f.address.trim(), city: f.city.trim(), zip: f.zip.trim() } : {}) }
       const { data, error } = await supabase.from('orders').insert({
         salon_id: salon.id, client_id: client.id, status: dep > 0 ? 'awaiting_payment' : 'confirmed',
-        fulfil, due_date: iso(dates[di]), contact, items, total, deposit: dep, card_message: card.trim() || null,
+        fulfil, due_date: iso(dates[di]), ...(timeOn ? { due_time: tm } : {}), contact, items, total, deposit: dep, card_message: card.trim() || null,
       }).select('id, number, created_at').single()
       if (error) throw error
       haptic('success')
-      onDone({ ...data, total, deposit: dep, fulfil, due: dates[di] })
+      // zapamti telefon i adresu za sledeći put (kupac ih samo proveri)
+      const patch = { phone: contact.phone, ...(fulfil === 'delivery' ? { ship: { address: contact.address, city: contact.city, zip: contact.zip } } : {}) }
+      supabase.from('clients').update(patch).eq('id', client.id).then(({ error: e2 }) => {
+        if (!e2) onClient?.(patch)
+        else if (patch.ship) supabase.from('clients').update({ phone: patch.phone }).eq('id', client.id).then(() => onClient?.({ phone: patch.phone }))
+      })
+      onDone({ ...data, total, deposit: dep, fulfil, due: dates[di], due_date: iso(dates[di]), due_time: timeOn ? tm : null })
     } catch (e) {
       haptic('warning'); setErr(e.message || String(e))
     }
@@ -109,7 +127,7 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
         </button>
       )}
 
-      <div className="eyebrow" style={{ marginTop: 16 }}>{L('Za kada', 'When')}{o.leadDays ? L(` · najranije za ${o.leadDays} dana`, ` · at least ${o.leadDays} days ahead`) : ''}</div>
+      <div className="eyebrow" style={{ marginTop: 16 }}>{L('Za kada', 'When')}{lead ? L(` · najranije za ${lead} dana`, ` · at least ${lead} days ahead`) : ''}</div>
       <div className="dates">
         {dates.map((d, k) => (
           <button key={k} className={k === di ? 'sel' : ''} disabled={full.has(iso(d))} onClick={() => setDi(k)}>
@@ -117,8 +135,18 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
           </button>
         ))}
       </div>
+      {timeOn && (
+        <>
+          <div className="eyebrow" style={{ marginTop: 14 }}>{mode === 'parts' ? L('Kada ti odgovara preuzimanje', 'Preferred pickup time') : L('Vreme preuzimanja', 'Pickup time')}{o.pickup?.place ? ` · ${o.pickup.place}` : ''}</div>
+          {mode === 'parts' && o.pickup?.partsNote && <p className="tiny" style={{ margin: '-4px 0 8px' }}>{o.pickup.partsNote}</p>}
+          <div className={'times' + (mode === 'parts' ? ' parts' : '')} role="radiogroup" aria-label={L('Vreme preuzimanja', 'Pickup time')}>
+            {slots.map(t => <button key={t} role="radio" aria-checked={tm === t} className={tm === t ? 'sel' : ''} onClick={() => { haptic('tap'); setTm(t) }}>{t}</button>)}
+          </div>
+        </>
+      )}
 
       <div className="eyebrow" style={{ marginTop: 16 }}>{L('Podaci', 'Your details')}</div>
+      {(client.phone || ship.address) && <p className="tiny" style={{ margin: '-4px 0 10px' }}>{L('Tvoji podaci od prošli put. Proveri ih ili izmeni.', 'Your details from last time. Check or change them.')}</p>}
       <div className="grid2">{inp('first', L('Ime', 'First name'), { autoComplete: 'given-name' })}{inp('last', L('Prezime', 'Last name'), { autoComplete: 'family-name' })}</div>
       <div className="grid2">{inp('phone', L('Telefon', 'Phone'), { type: 'tel', autoComplete: 'tel' })}{inp('email', 'Email', { type: 'email', autoComplete: 'email' })}</div>
       {fulfil === 'delivery' && (

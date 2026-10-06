@@ -1,7 +1,7 @@
 // Katalog: "Napravi svoj" + gotovi proizvodi po grupama
 import { useState } from 'react'
 import Bouquet from './Bouquet'
-import { onList, productPrice, din, nm, byId } from './engine'
+import { onList, productPrice, din, nm, byId, photosOf } from './engine'
 import { haptic } from '../lib/haptic'
 
 export default function Catalog({ shop, lang, onMake, onOpen, cartCount, onCart }) {
@@ -34,7 +34,7 @@ export default function Catalog({ shop, lang, onMake, onOpen, cartCount, onCart 
       {prods.map(p => (
         <button key={p.id} className="prow" onClick={() => { haptic('tap'); onOpen(p) }}>
           <span className="prow-img">
-            {p.photo ? <img src={p.photo} alt="" /> : <Bouquet shop={shop} design={p.design} size={84} keychain={g?.type === 'keychain'} />}
+            {photosOf(p)[0] ? <img src={photosOf(p)[0]} alt="" /> : <Bouquet shop={shop} design={p.design} size={84} keychain={g?.type === 'keychain'} />}
           </span>
           <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <span className="name">{nm(p, lang)}</span>

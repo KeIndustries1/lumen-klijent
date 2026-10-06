@@ -55,15 +55,18 @@ export default function App() {
   }, [session])
 
   // Push: traži dozvolu tek kad je klijent ulogovan i završio profil
-  useEffect(() => { if (client?.phone) initPush('klijent') }, [client?.id])
+  // Katalog (porudžbine): za nalog je dovoljno ime i mejl, telefon se traži na porudžbini
+  const profileDone = c => !!c && (salon?.kind === 'catalog' ? !!c.name?.trim() : !!c.phone)
+  useEffect(() => { if (profileDone(client)) initPush('klijent') }, [client?.id])
 
   if (session === undefined || !salon) return <Loading />
   if (!session) return <AuthScreen salon={salon} />
   if (!entered) return <Home salon={salon} standalone art={heroArt(salon)} onBook={() => setEntered(true)} />
   if (client === undefined) return <Loading />
-  if (!client || !client.phone) {
+  if (!profileDone(client)) {
     return (
       <CompleteProfile
+        catalog={salon.kind === 'catalog'}
         salonId={salon.id}
         userId={session.user.id}
         email={session.user.email}
@@ -171,9 +174,11 @@ function Profile({ client }) {
         <div className="profile-avatar">{initials}</div>
         <div style={{ fontFamily: 'Fraunces, serif', fontSize: 22 }}>{client.name}</div>
         <div className="tiny">{client.email}</div>
-        <a href={`tel:${client.phone.replace(/ /g,'')}`} style={{ display: 'block', marginTop: 14 }}>
-          <div className="ghost">{client.phone}</div>
-        </a>
+        {client.phone && (
+          <a href={`tel:${client.phone.replace(/ /g,'')}`} style={{ display: 'block', marginTop: 14 }}>
+            <div className="ghost">{client.phone}</div>
+          </a>
+        )}
       </div>
     </div>
   )

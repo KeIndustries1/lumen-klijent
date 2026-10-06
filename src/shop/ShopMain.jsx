@@ -30,10 +30,12 @@ function Upsell({ shop, lang, base, onAdd, onSkip }) {
   )
 }
 
-export default function ShopMain({ salon, client, LangSwitch, Settings }) {
+export default function ShopMain({ salon, client: client0, LangSwitch, Settings }) {
   const { lang } = useLang()
   const L = (sr, en) => (lang === 'en' ? en : sr)
   const shop = salon.shop || defaultShop()
+  const [client, setClient] = useState(client0)
+  useEffect(() => { setClient(client0) }, [client0])
   const [page, setPage] = useState('home')
   const [flow, setFlow] = useState(null)        // { type: 'builder'|'product'|'upsell'|'checkout'|'done', ... }
   const [cart, setCart] = useState([])
@@ -56,7 +58,7 @@ export default function ShopMain({ salon, client, LangSwitch, Settings }) {
   else if (flow?.type === 'product') body = <Product shop={shop} lang={lang} product={flow.product} onBack={() => setFlow(null)} onOrder={addToCart} />
   else if (flow?.type === 'upsell') body = <Upsell shop={shop} lang={lang} base={flow.base} onAdd={it => { setCart(c => [...c, it]); setFlow({ type: 'checkout' }) }} onSkip={() => setFlow({ type: 'checkout' })} />
   else if (flow?.type === 'checkout') body = <Checkout shop={shop} salon={salon} client={client} lang={lang} cart={cart} setCart={setCart}
-    onAddMore={() => { setFlow(null); setPage('catalog') }} onBack={() => setFlow(null)}
+    onAddMore={() => { setFlow(null); setPage('catalog') }} onBack={() => setFlow(null)} onClient={patch => setClient(c => ({ ...c, ...patch }))}
     onDone={order => { setCart([]); setRefresh(r => r + 1); setFlow({ type: 'done', order }) }} />
   else if (flow?.type === 'done') body = <Done shop={shop} order={flow.order} lang={lang} onOrders={() => { setFlow(null); setPage('orders') }} />
 
@@ -85,7 +87,7 @@ export default function ShopMain({ salon, client, LangSwitch, Settings }) {
               onMake={() => setFlow({ type: 'builder' })} onOpen={p => setFlow({ type: 'product', product: p })} />
           </div>
           <div style={{ display: page === 'orders' ? 'block' : 'none' }}>
-            <Orders shop={shop} client={client} lang={lang} refresh={refresh} />
+            <Orders shop={shop} salon={salon} client={client} lang={lang} refresh={refresh} />
           </div>
           <div style={{ display: page === 'notif' ? 'block' : 'none' }}>
             <Notifications client={client} salon={salon} />

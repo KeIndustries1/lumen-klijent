@@ -2,6 +2,9 @@
 import { drawing } from './engine'
 
 const A = { position: 'absolute' }
+const CROWN = { s: 0.8, m: 1, l: 1.35 }
+const BUTTERFLY_AT = [[30, 44, 40, '#9FB8F2', '#5B78C4'], [234, 30, 32, '#F4B8CE', '#C9688E'], [246, 112, 28, '#C9B2F0', '#7E5CC4'], [22, 120, 30, '#F6D98A', '#C99A2E'], [92, 18, 26, '#F4B8CE', '#C9688E'], [190, 8, 26, '#9FB8F2', '#5B78C4']]
+const CHERRY_AT = [[96, 70], [170, 64], [130, 100], [74, 116], [196, 112], [118, 40], [150, 130], [212, 84]]
 
 export default function Bouquet({ shop, design, size = 300, keychain = false, style }) {
   const g = drawing(shop, design || {}, { keychain })
@@ -24,9 +27,9 @@ export default function Bouquet({ shop, design, size = 300, keychain = false, st
           </svg>
         )}
 
-        {g.kind === 'wrap' && <div style={{ ...A, ...wrapBack, background: sheen + g.paper, filter: 'brightness(.9)', clipPath: 'polygon(0 0,100% 0,62% 100%,38% 100%)' }} />}
-        {g.kind === 'box-round' && <div style={{ ...A, left: 38, top: 30, width: 224, height: 224, borderRadius: '50%', background: g.paper, boxShadow: `inset 0 0 0 10px ${g.paperDark}, 0 12px 26px rgba(0,0,0,.35)` }} />}
-        {g.kind === 'box-square' && <div style={{ ...A, left: 44, top: 34, width: 212, height: 212, borderRadius: 18, background: g.paper, boxShadow: `inset 0 0 0 10px ${g.paperDark}, 0 12px 26px rgba(0,0,0,.35)` }} />}
+        {g.kind === 'wrap' && <div style={{ ...A, ...wrapBack, background: sheen + g.paperBg, filter: 'brightness(.9)', clipPath: 'polygon(0 0,100% 0,62% 100%,38% 100%)' }} />}
+        {g.kind === 'box-round' && <div style={{ ...A, left: 38, top: 30, width: 224, height: 224, borderRadius: '50%', background: g.paperBg, boxShadow: `inset 0 0 0 10px ${g.paperDark}, 0 12px 26px rgba(0,0,0,.35)` }} />}
+        {g.kind === 'box-square' && <div style={{ ...A, left: 44, top: 34, width: 212, height: 212, borderRadius: 18, background: g.paperBg, boxShadow: `inset 0 0 0 10px ${g.paperDark}, 0 12px 26px rgba(0,0,0,.35)` }} />}
         {g.kind === 'box-heart' && (
           <svg style={{ ...A, left: 0, top: 0, filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.35))' }} width="300" height="300" viewBox="0 0 300 300">
             <path d="M150 284 C 46 214 6 150 30 92 C 52 40 118 34 150 84 C 182 34 248 40 270 92 C 294 150 254 214 150 284 Z" fill={g.paper} stroke={g.paperDark} strokeWidth="12" />
@@ -40,7 +43,15 @@ export default function Bouquet({ shop, design, size = 300, keychain = false, st
           <div key={'g' + i} style={{ ...A, left: p.x, top: p.y, width: 5, height: 5, borderRadius: '50%', background: p.c, boxShadow: '0 0 6px 2px rgba(255,236,170,.9)' }} />
         ))}
 
-        {g.kind === 'wrap' && <div style={{ ...A, ...wrapFront, background: sheen + g.paper, clipPath: 'polygon(0 0,100% 0,58% 100%,42% 100%)' }} />}
+        {g.kind === 'wrap' && <div style={{ ...A, ...wrapFront, background: sheen + g.paperBg, clipPath: 'polygon(0 0,100% 0,58% 100%,42% 100%)' }} />}
+        {g.kind === 'wrap' && g.rim && <div style={{ ...A, left: wrapFront.left, top: wrapFront.top, width: wrapFront.width, height: 6, background: g.rim }} />}
+        {g.cherries > 0 && CHERRY_AT.slice(0, g.cherries).map(([x, y], i) => (
+          <svg key={'c' + i} style={{ ...A, left: x, top: y }} width="26" height="30" viewBox="0 0 26 30">
+            <path d="M8 18 Q10 8 18 2 M18 18 Q17 9 18 2" stroke="#4E7A35" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            <circle cx="8" cy="22" r="6" fill="#C8213A" /><circle cx="18" cy="22" r="6" fill="#B01B33" />
+            <circle cx="6" cy="20" r="1.6" fill="#fff" opacity=".7" /><circle cx="16" cy="20" r="1.6" fill="#fff" opacity=".7" />
+          </svg>
+        ))}
 
         {g.text && (
           <div style={{ ...A, left: box ? 70 : 72, top: box ? 236 : 196, width: box ? 160 : 156, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden',
@@ -58,15 +69,21 @@ export default function Bouquet({ shop, design, size = 300, keychain = false, st
           </svg>
         )}
         {g.crown && (
-          <svg style={{ ...A, left: 126, top: box ? 22 : 14 }} width="48" height="32" viewBox="0 0 48 32">
+          <svg style={{ ...A, left: 150 - CROWN[g.crownSize] * 24, top: (box ? 22 : 14) - (CROWN[g.crownSize] - 1) * 16 }} width={48 * CROWN[g.crownSize]} height={32 * CROWN[g.crownSize]} viewBox="0 0 48 32">
             <path d="M4 28 L8 8 L18 18 L24 4 L30 18 L40 8 L44 28 Z" fill="#E5B74C" stroke="#B88A2A" strokeWidth="1.5" strokeLinejoin="round" />
           </svg>
         )}
-        {g.butterflies && (
-          <>
-            <svg style={{ ...A, left: 30, top: 44 }} width="40" height="32" viewBox="0 0 40 32"><path d="M20 16 C12 0 0 4 4 14 C0 24 12 28 20 18 C28 28 40 24 36 14 C40 4 28 0 20 16Z" fill="#9FB8F2" stroke="#5B78C4" strokeWidth="1.2" /></svg>
-            <svg style={{ ...A, left: 234, top: 30 }} width="32" height="26" viewBox="0 0 40 32"><path d="M20 16 C12 0 0 4 4 14 C0 24 12 28 20 18 C28 28 40 24 36 14 C40 4 28 0 20 16Z" fill="#F4B8CE" stroke="#C9688E" strokeWidth="1.2" /></svg>
-          </>
+        {g.butterflies > 0 && BUTTERFLY_AT.slice(0, Math.max(1, g.butterflies)).map(([x, y, w, f, st], i) => (
+          <svg key={'b' + i} style={{ ...A, left: x, top: y }} width={w} height={w * 0.8} viewBox="0 0 40 32"><path d="M20 16 C12 0 0 4 4 14 C0 24 12 28 20 18 C28 28 40 24 36 14 C40 4 28 0 20 16Z" fill={f} stroke={st} strokeWidth="1.2" /></svg>
+        ))}
+        {g.toyCap && (
+          <svg style={{ ...A, left: g.toy ? 228 : 14, top: 190 }} width="60" height="72" viewBox="0 0 60 72">
+            <circle cx="14" cy="18" r="8" fill="#A97A52" /><circle cx="46" cy="18" r="8" fill="#A97A52" />
+            <circle cx="30" cy="30" r="17" fill="#B98A5E" /><ellipse cx="30" cy="58" rx="20" ry="14" fill="#A97A52" />
+            <ellipse cx="30" cy="35" rx="7" ry="5" fill="#E2C49E" /><circle cx="24" cy="26" r="2" fill="#2A1A12" /><circle cx="36" cy="26" r="2" fill="#2A1A12" />
+            <path d="M8 10 L30 2 L52 10 L30 18 Z" fill="#1E1A22" /><rect x="24" y="12" width="12" height="6" fill="#1E1A22" />
+            <path d="M52 10 L52 22" stroke="#E5B74C" strokeWidth="2" /><circle cx="52" cy="23" r="2.5" fill="#E5B74C" />
+          </svg>
         )}
         {g.toy && (
           <svg style={{ ...A, left: 14, top: 196 }} width="60" height="66" viewBox="0 0 60 66">

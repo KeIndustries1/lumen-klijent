@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Bouquet from './Bouquet'
-import { onList, visibleSteps, stepError, designPrice, din, nm, ttl, byId, packOf, packColors, isBox, summary, newDesign, cloneDesign } from './engine'
+import { onList, visibleSteps, stepError, designPrice, din, nm, ttl, byId, packOf, packColors, isBox, summary, newDesign, cloneDesign, flowerColors, paperBg, extraQty, totalCount } from './engine'
 import { haptic } from '../lib/haptic'
 
 export function readImage(file, max = 1200) {
@@ -30,7 +30,7 @@ export function Swatches({ list, value, onPick, lang }) {
     <div className="swatches" role="radiogroup">
       {list.map(c => (
         <button key={c.id} role="radio" aria-checked={value === c.id} className={'sw' + (value === c.id ? ' sel' : '')} onClick={() => { haptic('tap'); onPick(c.id) }}>
-          <i style={{ background: c.hex }} />{nm(c, lang)}
+          <i style={{ background: paperBg(c, true) }} />{nm(c, lang)}
         </button>
       ))}
     </div>
@@ -39,17 +39,28 @@ export function Swatches({ list, value, onPick, lang }) {
 
 export function ExtrasPicker({ shop, d, set, lang }) {
   const L = (sr, en) => (lang === 'en' ? en : sr)
+  const n = totalCount(d)
   return onList(shop.extras).map(e => {
     const v = d.extras?.[e.id]
-    const sel = !!v || v === ''
-    const toggle = () => { haptic('tap'); set(n => { const ex = { ...n.extras }; if (sel) delete ex[e.id]; else ex[e.id] = e.input === 'none' ? true : ''; n.extras = ex }) }
+    const sel = (!!v || v === '') && v !== 0
+    const qty = e.input === 'qty'
+    const toggle = () => { haptic('tap'); set(x => { const ex = { ...x.extras }; if (sel) delete ex[e.id]; else ex[e.id] = e.input === 'none' ? true : qty ? 1 : ''; x.extras = ex }) }
+    const unit = e.perChar ? L(' / slovo', ' / letter') : qty ? L(' / kom', ' / pc') : e.perFlower ? L(' / cvet', ' / flower') : ''
     return (
       <div key={e.id}>
         <button className={'opt' + (sel ? ' sel' : '')} onClick={toggle}>
           <span className="chk">✓</span><span className="grow" style={{ fontWeight: 600 }}>{nm(e, lang)}</span>
-          <span className="price">+{din(e.price)}{e.perChar ? L(' / slovo', ' / letter') : ''}</span>
+          <span className="price">+{din(e.price)}{unit}{e.perFlower && sel && n ? ` = ${din(e.price * n)}` : ''}</span>
         </button>
-        {sel && e.input !== 'none' && (
+        {sel && qty && (
+          <div className="qty" style={{ margin: '-2px 0 12px' }}>
+            <b>{L('Komada', 'Pieces')}</b>
+            <button aria-label={L('Manje', 'Less')} onClick={() => { haptic('tap'); set(x => { const q = extraQty(x.extras[e.id]) - 1; const ex = { ...x.extras }; if (q < 1) delete ex[e.id]; else ex[e.id] = q; x.extras = ex }) }}>−</button>
+            <span>{extraQty(v)}</span>
+            <button aria-label={L('Više', 'More')} onClick={() => { haptic('tap'); set(x => { x.extras = { ...x.extras, [e.id]: Math.min(e.max || 50, extraQty(x.extras[e.id]) + 1) } }) }}>+</button>
+          </div>
+        )}
+        {sel && !qty && e.input !== 'none' && (
           <label className="field" style={{ margin: '-2px 0 12px' }}>
             <span>{e.input === 'number' ? L('Upiši broj', 'Enter a number') : e.input === 'letters' ? L('Upiši slova', 'Enter letters') : L('Upiši tekst', 'Enter text')}</span>
             <input className="fin" value={typeof v === 'string' ? v : ''} maxLength={e.maxLen || 40} inputMode={e.input === 'number' ? 'numeric' : 'text'}
@@ -57,13 +68,59 @@ export function ExtrasPicker({ shop, d, set, lang }) {
                 let t = ev.target.value
                 if (e.input === 'number') t = t.replace(/[^0-9]/g, '')
                 if (e.input === 'letters') t = t.toUpperCase()
-                set(n => { n.extras = { ...n.extras, [e.id]: t } })
+                set(x => { x.extras = { ...x.extras, [e.id]: t } })
               }} />
           </label>
         )}
       </div>
     )
   })
+}
+
+// Cveće po redovima: boja i broj za svaki red; isti cvet može u više boja (5 plavih + 10 belih ruža)
+export function FlowerRows({ shop, d, set, lang, colors = true, count = 'split' }) {
+  const L = (sr, en) => (lang === 'en' ? en : sr)
+  const items = d.items || []
+  const max = shop.limits?.maxFlowers || 999
+  const nOf = fid => items.filter(x => x.flower === fid).length
+  const total = items.reduce((a, x) => a + (Number(x.count) || 0), 0)
+  return (
+    <>
+      {items.map((it, k) => {
+        const f = byId(shop.flowers, it.flower)
+        const multi = nOf(it.flower) > 1
+        const last = !items.slice(k + 1).some(x => x.flower === it.flower)
+        const showCount = count === true || (count === 'split' && multi)
+        return (
+          <div key={k} className="frow">
+            <div className="frow-head">
+              <span className="swlabel" style={{ margin: 0 }}>{nm(f, lang)}{!showCount ? ` · ${it.count}` : ''}</span>
+              {showCount && (
+                <span className="qty mini">
+                  <button aria-label={L('Manje', 'Less')} onClick={() => { haptic('tap'); set(n => { n.items[k].count = Math.max(1, (n.items[k].count || 1) - 1) }) }}>−</button>
+                  <span>{it.count}</span>
+                  <button aria-label={L('Više', 'More')} onClick={() => { haptic('tap'); set(n => { if (total < max) n.items[k].count = (n.items[k].count || 0) + 1 }) }}>+</button>
+                </span>
+              )}
+              {multi && <button className="frow-x" aria-label={L('Ukloni ovu boju', 'Remove this color')} onClick={() => { haptic('tap'); set(n => { n.items.splice(k, 1) }) }}>✕</button>}
+            </div>
+            {colors && <Swatches list={flowerColors(shop, it.flower)} value={it.color} lang={lang} onPick={id => set(n => { n.items[k].color = id })} />}
+            {colors && last && flowerColors(shop, it.flower).length > 1 && (
+              <button className="frow-add" onClick={() => {
+                haptic('tap')
+                set(n => {
+                  const used = n.items.filter(x => x.flower === it.flower).map(x => x.color)
+                  const fc = flowerColors(shop, it.flower)
+                  const c = fc.find(x => !used.includes(x.id)) || fc[0]
+                  n.items.splice(k + 1, 0, { flower: it.flower, count: 1, color: c?.id })
+                })
+              }}>+ {L(`${nm(f, lang)} u još jednoj boji`, `${nm(f, lang)} in another color`)}</button>
+            )}
+          </div>
+        )
+      })}
+    </>
+  )
 }
 
 export default function Builder({ shop, lang, initial, onBack, onDone }) {
@@ -113,7 +170,7 @@ export default function Builder({ shop, lang, initial, onBack, onDone }) {
                 haptic('tap')
                 set(n => {
                   if (sel) n.items = n.items.filter(it => it.flower !== f.id)
-                  else n.items = [...(n.items || []), { flower: f.id, count: (n.items || []).length ? 5 : (presets[1] || 11), color: onList(shop.colors)[0]?.id }]
+                  else n.items = [...(n.items || []), { flower: f.id, count: (n.items || []).length ? 5 : (presets[1] || 11), color: flowerColors(shop, f.id)[0]?.id }]
                 })
               }}>
                 <span className="chk">✓</span><span className="grow" style={{ fontWeight: 600 }}>{nm(f, lang)}</span>
@@ -126,7 +183,7 @@ export default function Builder({ shop, lang, initial, onBack, onDone }) {
             <>
               {(d.items || []).map((it, k) => (
                 <div key={k} className="qty">
-                  <b>{nm(byId(shop.flowers, it.flower), lang)}</b>
+                  <b>{nm(byId(shop.flowers, it.flower), lang)}{(d.items || []).filter(x => x.flower === it.flower).length > 1 ? ` · ${nm(byId(shop.colors, it.color), lang).toLowerCase()}` : ''}</b>
                   <button aria-label={L('Manje', 'Less')} onClick={() => set(n => { n.items[k].count = Math.max(1, (n.items[k].count || 1) - 1) })}>−</button>
                   <span>{it.count}</span>
                   <button aria-label={L('Više', 'More')} onClick={() => set(n => { n.items[k].count = Math.min(shop.limits?.maxFlowers || 999, (n.items[k].count || 0) + 1) })}>+</button>
@@ -139,12 +196,7 @@ export default function Builder({ shop, lang, initial, onBack, onDone }) {
             </>
           )}
 
-          {step?.type === 'colors' && (d.items || []).map((it, k) => (
-            <div key={k}>
-              <div className="swlabel">{nm(byId(shop.flowers, it.flower), lang)} · {it.count}</div>
-              <Swatches list={onList(shop.colors)} value={it.color} lang={lang} onPick={id => set(n => { n.items[k].color = id })} />
-            </div>
-          ))}
+          {step?.type === 'colors' && <FlowerRows shop={shop} d={d} set={set} lang={lang} colors count="split" />}
 
           {step?.type === 'packColor' && (
             <>
