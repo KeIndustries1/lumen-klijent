@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AtSign, Phone, MapPin, Clock } from 'lucide-react'
 
 const hm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0')
@@ -28,6 +29,20 @@ function hoursLines(hours) {
 // Gore: slika/gradijent, naziv salona, dugme Rezervisi.
 // Ispod: Info kockice (IG, telefon, lokacija) + opis salona.
 // ============================================================
+// "O nama": duži tekst se skraćuje na početak, uz "Pročitaj celu priču"
+function About({ text }) {
+  const [open, setOpen] = useState(false)
+  const long = text.length > 420
+  const short = long ? text.slice(0, text.lastIndexOf(' ', 380)).trim() + '…' : text
+  return (
+    <div className="home-about">
+      <div className="eyebrow">O nama</div>
+      <p style={{ whiteSpace: 'pre-line' }}>{open || !long ? text : short}</p>
+      {long && <button className="about-more" onClick={() => setOpen(o => !o)}>{open ? 'Prikaži manje' : 'Pročitaj celu priču'}</button>}
+    </div>
+  )
+}
+
 export default function Home({ salon, onBook, label = 'Rezerviši', standalone = false, art = null }) {
   const igHandle = salon.instagram?.replace('@', '')
   // natpis iznad imena: null = 'SALON' (kao ranije), '' = bez natpisa
@@ -77,12 +92,7 @@ export default function Home({ salon, onBook, label = 'Rezerviši', standalone =
           )}
         </div>
 
-        {salon.about_sr && (
-          <div className="home-about">
-            <div className="eyebrow">O nama</div>
-            <p>{salon.about_sr}</p>
-          </div>
-        )}
+        {salon.about_sr && <About text={salon.about_sr} />}
       </div>
     </div>
   )

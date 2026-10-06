@@ -12,6 +12,7 @@ import Checkout from './Checkout'
 import Orders, { Done } from './Orders'
 import Bouquet from './Bouquet'
 import { heroArt } from './HeroArt'
+import { RulesButton, hasRules } from './Rules'
 import { byId, matchingDesign, productPrice, nm, designPrice, defaultShop } from './engine'
 import './shop.css'
 
@@ -73,14 +74,7 @@ export default function ShopMain({ salon, client: client0, LangSwitch, Settings 
         <div className="tabpage-stack">
           <div style={{ display: page === 'home' ? 'block' : 'none' }}>
             <Home salon={salon} art={heroArt(salon)} label={shop.texts?.cta || L('Naruči', 'Order')} onBook={() => goTab('catalog')} />
-            {(shop.order?.rules || []).filter(Boolean).length > 0 && (
-              <div className="homedark" style={{ paddingTop: 0 }}>
-                <div className="eyebrow">{L('Pravila naručivanja', 'Ordering rules')}</div>
-                <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--muted)', fontSize: 13.5, lineHeight: 1.6 }}>
-                  {shop.order.rules.filter(Boolean).map((r, i) => <li key={i}>{r}</li>)}
-                </ul>
-              </div>
-            )}
+            {hasRules(shop) && <div className="homedark" style={{ paddingTop: 0 }}><RulesButton shop={shop} lang={lang} /></div>}
           </div>
           <div style={{ display: page === 'catalog' ? 'block' : 'none' }}>
             <Catalog shop={shop} lang={lang} cartCount={cart.length} onCart={() => setFlow({ type: 'checkout' })}

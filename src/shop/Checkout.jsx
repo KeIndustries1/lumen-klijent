@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Bouquet from './Bouquet'
 import { din, orderDates, iso, deposit, lines, summary, pickupChoices, pickupMode, leadFor, totalCount } from './engine'
 import { haptic } from '../lib/haptic'
+import { RulesSheet, hasRules } from './Rules'
 
 const DAYS = { sr: ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'], en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] }
 
@@ -37,7 +38,8 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
   useEffect(() => { setDi(0) }, [fulfil])
   useEffect(() => { if (tm && !slots.includes(tm)) setTm('') }, [di, fulfil])
   const [card, setCard] = useState('')
-  const [agree, setAgree] = useState(!(o.rules || []).filter(Boolean).length)
+  const [agree, setAgree] = useState(!hasRules(shop))
+  const [rulesOpen, setRulesOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [tried, setTried] = useState(false)
@@ -173,12 +175,16 @@ export default function Checkout({ shop, salon, client, lang, cart, setCart, onA
         ) : <div className="ln"><span>{L('Plaćaš pri preuzimanju', 'Pay at pickup')}</span><b>{din(total)}</b></div>}
       </div>
 
-      {(o.rules || []).filter(Boolean).length > 0 && (
-        <label className="row" style={{ alignItems: 'flex-start', marginTop: 14, cursor: 'pointer' }}>
-          <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} style={{ width: 22, height: 22, accentColor: 'var(--rouge)', flex: 'none', marginTop: 1 }} />
-          <span className="tiny" style={{ fontSize: 13.5 }}>{L('Pročitao/la sam pravila:', 'I have read the rules:')} {(o.rules || []).filter(Boolean).join(' ')}</span>
-        </label>
+      {hasRules(shop) && (
+        <div className="row" style={{ alignItems: 'flex-start', marginTop: 14 }}>
+          <input id="agree" type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} style={{ width: 22, height: 22, accentColor: 'var(--rouge)', flex: 'none', marginTop: 1 }} />
+          <label htmlFor="agree" className="tiny" style={{ fontSize: 13.5, cursor: 'pointer' }}>
+            {L('Pročitao/la sam i prihvatam ', 'I have read and accept the ')}
+            <button type="button" className="linkish" onClick={e => { e.preventDefault(); setRulesOpen(true) }}>{L('pravila i uslove poručivanja', 'ordering terms')}</button>.
+          </label>
+        </div>
       )}
+      {rulesOpen && <RulesSheet shop={shop} lang={lang} onClose={() => setRulesOpen(false)} />}
       {err && <p className="err-text">{err}</p>}
 
       <div className="bar">
