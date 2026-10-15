@@ -37,7 +37,7 @@ export default function ShopMain({ salon, client: client0, LangSwitch, Settings 
   const shop = salon.shop || defaultShop()
   const [client, setClient] = useState(client0)
   useEffect(() => { setClient(client0) }, [client0])
-  const [page, setPage] = useState('home')
+  const [page, setPage] = useState('catalog')
   const [flow, setFlow] = useState(null)        // { type: 'builder'|'product'|'upsell'|'checkout'|'done', ... }
   const [cart, setCart] = useState([])
   const [refresh, setRefresh] = useState(0)

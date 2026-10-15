@@ -5,6 +5,7 @@ import { haptic } from './lib/haptic'
 import { Capacitor } from '@capacitor/core'
 import { Browser } from '@capacitor/browser'
 import { nativeSignIn } from './lib/nativeAuth'
+import appleLogo from './assets/apple-logo-white.svg'  // zvanični logo iz Apple Design Resources
 
 // ============================================================
 // Ekran za prijavu / registraciju. Prvi ekran koji NOVI korisnik
@@ -169,12 +170,10 @@ function GoogleMark() {
     </g></svg>
   )
 }
+// Zvanični Sign in with Apple logo (Apple Design Resources, beli, bez izmena).
+// Slika je 56x56 sa crnim kvadratom, a dugme je crno, pa se ivice ne vide.
 function AppleMark() {
-  return (
-    <svg width="16" height="18" viewBox="0 0 16 18" fill="#fff">
-      <path d="M13.1 9.5c0-1.46.67-2.55 2-3.27-.77-1.1-1.94-1.7-3.5-1.82-1.47-.12-2.72.86-3.44.86-.75 0-1.9-.83-3.15-.8-1.64.02-3.15 1-3.98 2.53C-.76 9.9-.01 15.2 1.62 17.3c.78 1 1.7 2.13 2.92 2.08 1.16-.04 1.6-.75 3.02-.75 1.4 0 1.8.75 3.03.73 1.25-.02 2.07-1.05 2.85-2.06.85-1.13 1.2-2.22 1.22-2.28-.03-.01-2.34-.9-2.36-3.55l-.2.02zM10.6 3.05C11.24 2.27 11.68 1.18 11.55 0 10.5.06 9.23.7 8.55 1.5c-.6.68-1.1 1.79-.96 2.9 1.14.09 2.32-.57 3.01-1.35z"/>
-    </svg>
-  )
+  return <img src={appleLogo} alt="" width="56" height="56" style={{ margin: '-19px', display: 'block' }} />
 }
 
 function poruka(error) {
