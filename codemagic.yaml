@@ -33,7 +33,9 @@ workflows:
       - name: Broj builda
         script: |
           cd "$APP_DIR/ios/App"
-          sed -i '' -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = $((BUILD_NUMBER + 100));/g" App.xcodeproj/project.pbxproj
+          # Minuti od 1970: uvek veći od prethodnog builda, bez obzira na Codemagic aplikaciju
+          BN=$(( $(date +%s) / 60 ))
+          sed -i '' -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = $BN;/g" App.xcodeproj/project.pbxproj
       - name: Build IPA
         script: |
           cd "$APP_DIR/ios/App"
